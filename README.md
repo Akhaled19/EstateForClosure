@@ -23,7 +23,7 @@ API backend for managing estate foreclosure and downsizing inventory, eBay listi
 ### 1. Clone the repo
 
 ```bash
-git clone <your-repo-url>
+git clone git@github.com:Akhaled19/EstateForClosure.git
 cd estate-backend
 ```
 
