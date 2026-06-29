@@ -5,6 +5,7 @@ import Dashboard from "./pages/dashboard";
 import Inventory from "./pages/inventory";
 import Scan from "./pages/scan";
 import Login from "./pages/login";
+import SignUp from "./pages/signup";
 
 import { useState } from 'react'
 
@@ -23,6 +24,8 @@ function App() {
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/scan" element={<Scan />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+
 
       </Routes>
 
