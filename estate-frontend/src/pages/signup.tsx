@@ -20,6 +20,8 @@ export default function SignUp() {
       return;
     }
 
+    https://storyset.com/illustration/moving/pana#D4621AFF&hide=speech-bubble&hide=complete
+
     setLoading(true);
 
     try {
@@ -100,6 +102,14 @@ export default function SignUp() {
           Already have an account? <a href="/login">Sign in</a>
         </p>
       </div>
+      <a
+        href="https://storyset.com/people"
+        target="_blank"
+        rel="noreferrer"
+        className="lp-credit"
+      >
+        People illustrations by Storyset
+      </a>
     </div>
   );
 }

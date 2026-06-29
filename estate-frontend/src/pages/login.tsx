@@ -70,6 +70,15 @@ export default function Login() {
           Don't have an account? <a href="/signup">Sign up</a>
         </p>
       </div>
+
+      <a
+        href="https://storyset.com/people"
+        target="_blank"
+        rel="noreferrer"
+        className="lp-credit"
+      >
+        People illustrations by Storyset
+      </a>
     </div>
   );
 }

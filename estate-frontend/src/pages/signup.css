@@ -151,6 +151,16 @@
   text-decoration: underline;
 }
 
+.lp-credit {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  font-size: 10px;
+  color: #6B84B0;
+  text-decoration: none;
+  opacity: 0.6;
+}
+
 @media (max-width: 768px) {
   .sp-page {
     flex-direction: column;
