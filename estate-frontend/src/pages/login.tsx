@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import movingImg from "../assets/Moving-pana.svg";
 import "./login.css";
 import { loginUser } from "../services/auth"
@@ -8,14 +9,19 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const naviagte = useNavigate();
 
   const handleLogin = async () => {
+    setLoading(true);
+    setError("");
     try {
       const data = await loginUser(email, password);
       localStorage.setItem("token", data.access_token);
-      window.location.href = "/dashboard";
+      naviagte("/dashboard");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 

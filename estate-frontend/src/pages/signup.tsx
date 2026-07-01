@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import movingImg from "../assets/Moving-pana.svg";
 import { registerUser } from "../services/auth"
-
 import "./Signup.css";
 
 export default function SignUp() {
@@ -11,6 +11,7 @@ export default function SignUp() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const naviagte = useNavigate();
 
   const handleSignUp = async () => {
     setError("");
@@ -27,7 +28,7 @@ export default function SignUp() {
     try {
       const data = await registerUser(fullName, email, password);
       localStorage.setItem("token", data.access_token);
-      window.location.href = "/dashboard";
+      naviagte("/dashboard");
     } catch (err) {
       setError(err.message);
     } finally {
