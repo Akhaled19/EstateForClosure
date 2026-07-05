@@ -1,24 +1,47 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+
+const navLinks = [
+  { path: "/dashboard", name: "Dashboard"},
+  { path: "/inventory", name: "Inventory"},
+  { path: "/listings", name: "Listings"},
+  { path: "/scan", name: "Scan new item"}
+];
+
 
 export default function Navbar() {
+  const location = useLocation();
   return (
     <div className="navbar">
 
-      <Link to="/dashboard">
-        Dashboard
-      </Link>
+      <h2 className = "navbar-title"> 
+        <span className = "app-name-left"> Estate </span>
+        <span className = "app-name-right"> Forclosure </span> 
+        </h2>
 
-      <Link to="/inventory">
-        Inventory
-      </Link>
+      <div className = "navbar-links"> 
+        {navLinks.map((link) => {
+          const active = location.pathname === link.path;
 
-      <Link to="/scan">
-        Scan new item
-      </Link>
+          return (
+            <Link
+            key = {link.path}
+            to = {link.path}
+            className = {`nav-link ${active ? "active" : ""}`}
+            > 
+            {
+              link.name
+            }
+            </Link>
+          );
+        
+        })}
+        </div>
 
-      <Link to="/login" className = "login">
+        <Link to = "/login" className = "nav-link login">
         Sign In
-      </Link>
+        
+        </Link>
+
 
     </div>
   );
