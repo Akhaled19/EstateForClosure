@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+
 import "./item.css";
 
 const mockItem = {
@@ -16,11 +18,15 @@ const mockItem = {
 };
 
 export default function ItemPage() {
-    const { id } = useParams();
+    const navigate = useNavigate();
+    const { id } = useParams(); // id will represent the item id/ # when implemented, to generate the page
     const [item, setItem] = useState(mockItem);
     const [bid, setBid] = useState("");
     const [saved, setSaved] = useState(false);
-    const [loggedIn, setLoggedIn] = useState(true)
+    const [loggedIn, setLoggedIn] = useState(
+
+
+    )
 
 
     const saveButtonText =() => {
@@ -35,7 +41,7 @@ export default function ItemPage() {
         if (loggedIn) {
             setSaved(!saved);
         } else {
-            window.location.href = "/login";
+            navigate('/signup');
         }
     };
 
@@ -63,7 +69,6 @@ export default function ItemPage() {
 
                     <div className="ip-price-row">
                         <p className="ip-price">${item.price.toFixed(2)}</p>
-                        <span className="badge badge-condition">{item.condition} Condition</span>
                         <span className="badge badge-ebay">{item.ebayStatus}</span>
                     </div>
 
@@ -109,7 +114,7 @@ export default function ItemPage() {
                             disabled = {!loggedIn}
                             className="ip-bid-btn"> {loggedIn? "Place bid": "Sign in to place bid"}</button>
                         </div>
-                        <p className="ip-bid-hint" >. Current highest bid: ${item.highestBid.toFixed(2)}</p>
+                        <p className="ip-bid-hint" >Current highest bid: ${item.highestBid.toFixed(2)}</p>
 
                         <div className="ip-divider-sm" />
                         <button
