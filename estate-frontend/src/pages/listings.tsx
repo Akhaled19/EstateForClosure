@@ -1,17 +1,14 @@
-
-
-export default function Dashboard() {
+export default function Listings() {
 
 
   return (
-    <div className="dashboard">
+    <div className="listings">
 
       <div className="content pt-5">
 
         <div className="text-[30px] text-black ml-5">
-          Dashboard:
+          Manage listings:
         </div>
-
 
 
       </div>

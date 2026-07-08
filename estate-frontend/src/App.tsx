@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/dashboard";
 import Inventory from "./pages/inventory";
+import Listings from "./pages/listings";
 import Scan from "./pages/scan";
 import Login from "./pages/login";
 import SignUp from "./pages/signup";
@@ -14,18 +15,21 @@ function Layout() {
   const hideNavbar = ["/login", "/signup"].includes(location.pathname);
 
   return (
-    <>
+    <div className = " min-h-screen bg-white"> 
       {!hideNavbar && <Navbar />}
+      <div className = " overflow-auto">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />}/>
           <Route path="/inventory" element={<Inventory />}/>
+          <Route path="/listings" element={<Listings />}/>
           <Route path="/scan" element={<Scan />}/>
           <Route path="/login" element={<Login />}/>
           <Route path="/signup" element={<SignUp />}/>
           <Route path="/items/:id"  element={<ItemPage />}/>
         </Routes>
-    </>
+      </div>
+    </div>
   )
 }
 
