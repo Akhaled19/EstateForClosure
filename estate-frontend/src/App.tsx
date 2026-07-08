@@ -6,6 +6,8 @@ import Inventory from "./pages/inventory";
 import Scan from "./pages/scan";
 import Login from "./pages/login";
 import SignUp from "./pages/signup";
+import ItemPage from "./pages/item";
+
 
 function Layout() {
   const location = useLocation();
@@ -21,6 +23,7 @@ function Layout() {
           <Route path="/scan" element={<Scan />}/>
           <Route path="/login" element={<Login />}/>
           <Route path="/signup" element={<SignUp />}/>
+          <Route path="/items/:id"  element={<ItemPage />}/>
         </Routes>
     </>
   )

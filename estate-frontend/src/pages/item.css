@@ -1,0 +1,327 @@
+.ip-page {
+    background: #F2F4F7;
+    min-height: 100vh;
+    padding: 32px 48px;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.ip-loading {
+    padding: 48px;
+    color: #6B7A90;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.ip-back {
+    font-size: 12px;
+    color: #6B7A90;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 28px;
+    letter-spacing: 0.02em;
+}
+
+.ip-back:hover {
+    color: #1B2A4A;
+}
+
+.ip-layout {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+.ip-photos {
+    width: 400px;
+    flex-shrink: 0;
+}
+
+.ip-main-photo {
+    width: 100%;
+    height: 280px;
+    background: #E8ECF2;
+    border-radius: 12px;
+    border: 1px solid #CDD3DC;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.ip-main-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ip-thumbs {
+    display: flex;
+    gap: 8px;
+}
+
+.ip-thumb {
+    width: 68px;
+    height: 68px;
+    background: #E8ECF2;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.ip-thumb.active {
+    border-color: #D4621A;
+}
+
+
+.ip-info {
+    flex: 1;
+}
+
+.ip-category {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #D4621A;
+    font-weight: 500;
+    margin: 0 0 6px;
+}
+
+.ip-title {
+    font-size: 22px;
+    font-weight: 500;
+    color: #1B2A4A;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0 0 4px;
+}
+
+.ip-location {
+    font-size: 12px;
+    color: #6B7A90;
+    margin: 0 0 14px;
+}
+
+.ip-price-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.ip-price {
+    font-size: 28px;
+    font-weight: 600;
+    color: #D4621A;
+    margin: 0;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.badge-ebay {
+    background: #FEF0E6;
+    color: #D4621A;
+    border: 1px solid #F4C9A8;
+}
+
+.badge-condition {
+    background: #E8EDF5;
+    color: #1B2A4A;
+    border: 1px solid #C5D0E0;
+}
+
+.ip-divider {
+    height: 1px;
+    background: #DDE1E9;
+    margin: 16px 0;
+}
+
+.ip-divider-sm {
+    height: 1px;
+    background: #EEF0F4;
+    margin: 12px 0;
+}
+
+.section-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: #4A5568;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 8px;
+}
+
+.ip-description {
+    font-size: 13px;
+    color: #4A5568;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.ip-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+}
+
+.ip-detail {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px 14px;
+    border: 1px solid #CDD3DC;
+}
+
+.detail-label {
+    font-size: 10px;
+    color: #6B7A90;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 4px;
+}
+
+.detail-value {
+    font-size: 13px;
+    color: #1B2A4A;
+    font-weight: 500;
+    margin: 0;
+}
+
+.ip-purchase {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #CDD3DC;
+    padding: 20px;
+    margin-top: 4px;
+}
+
+.ip-buy-btn {
+    width: 100%;
+    padding: 12px;
+    background: #D4621A;
+    border: 2px solid #D4621A;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #fff;
+    cursor: pointer;
+    margin-bottom: 0;
+    letter-spacing: 0.01em;
+}
+
+.ip-buy-btn:hover {
+    background: #B8521A;
+    border-color: #B8521A;
+}
+
+.ip-bid-label {
+    font-size: 12px;
+    color: #4A5568;
+    font-weight: 500;
+    margin: 0 0 8px;
+}
+
+.ip-bid-row {
+    display: flex;
+    gap: 8px;
+}
+
+.ip-bid-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: #F2F4F7;
+    border: 1.5px solid #CDD3DC;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1B2A4A;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.ip-bid-input:focus {
+    border-color: #1B2A4A;
+}
+
+.ip-bid-input::placeholder {
+    color: #A0AABA;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+}
+
+.ip-bid-btn {
+    padding: 10px 18px;
+    background: #1B2A4A;
+    border: 2px solid #1B2A4A;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.ip-bid-btn:hover {
+    background: #243660;
+    border-color: #243660;
+}
+
+.ip-bid-hint {
+    font-size: 11px;
+    color: #6B7A90;
+    margin: 6px 0 0;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.ip-save {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: 1.5px solid #1B2A4A;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1B2A4A;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+}
+
+.ip-save:hover {
+    background: #F0F3F8;
+}
+
+.ip-save.saved {
+    background: #1B2A4A;
+    color: #fff;
+}
+
+.ip-timer {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #CDD3DC;
+    padding: 20px;
+    margin-top: 4px;
+
+}
+
+@media (max-width: 768px) {
+    .ip-page {
+        padding: 24px 20px;
+    }
+
+    .ip-layout {
+        flex-direction: column;
+    }
+
+    .ip-photos {
+        width: 100%;
+    }
+}
