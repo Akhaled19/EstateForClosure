@@ -26,11 +26,12 @@ export default function InvenSearch({search, setSearch, setStatus}: Props) {
         className="w-44 px-4 py-2 border border-gray-300 rounded-lg text-lg"
       >
 
-        <option value= "all"> Filter </option>
+        <option value= "all"> All Items </option>
         <option value= "Unlisted"> Unlisted </option>
         <option value= "Family"> Family </option>
         <option value= "Listed"> Listed </option>
         <option value= "Sold"> Sold </option>
+        <option value= "Shipped"> Shipped </option>
       </select>
 
     </div>

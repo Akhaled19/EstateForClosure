@@ -2,9 +2,10 @@ import { useState } from "react";
 import InvenRows from "./InvenRows";
 import InvenSearch from "./InvenSearch";
 
-export type Status = "Unlisted" | "Family" | "Listed" | "Sold";
+export type Status = "Unlisted" | "Family" | "Listed" | "Sold" | "Shipped";
 
 export type Item = {
+  id: number;
   title: string;
   description: string;
   status: Status;
@@ -13,6 +14,7 @@ export type Item = {
 
   const items: Item[] = [
     {
+      id: 1,
       title: 'Couch',
       description:
         "Good condition, minor wear on the armrests. Seats three comfortably.",
@@ -20,6 +22,7 @@ export type Item = {
       date: "06/24/2026",
     },
     {
+      id: 2,
       title: "Mattress",
       description:
         "Decent condition, minor wear. Provides comfortable sleep.",
@@ -27,9 +30,24 @@ export type Item = {
       date: "06/28/2026",
     },
     {
+      id: 3,
       title: "Wooden chair",
       description: "Wooden chair in mild condition, partial minor scratches on the surface.",
       status: "Family",
+      date: "07/2/2026",
+    },
+    {
+      id: 4,
+      title: "Table",
+      description: "Table in good condition, minor scratches on the surface.",
+      status: "Shipped",
+      date: "07/2/2026",
+    },
+    {
+      id: 5,
+      title: "Vase",
+      description: "Glass vase in good condition, no visible damage.",
+      status: "Unlisted",
       date: "07/2/2026",
     },
   ];
@@ -93,9 +111,20 @@ export default function InvenTable() {
         </thead>
 
         <tbody>
-          {filtered.map((item, i) => (
-            <InvenRows key={i} item={item} />
-          ))}
+          { filtered.length === 0 ? ( 
+            <tr> 
+
+              <td colSpan={5} className="text-center py-6 text-black font-bold">
+                No results found.
+              </td>
+
+            </tr>
+          ) : (
+            filtered.map((item) => (
+              <InvenRows key={item.id} item={item} />
+            ))
+          )}
+
         </tbody>
       
       </table>

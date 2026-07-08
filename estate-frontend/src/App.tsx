@@ -13,9 +13,9 @@ function Layout() {
   const hideNavbar = ["/login", "/signup"].includes(location.pathname);
 
   return (
-    <div className = "flex min-h-screen bg-white"> 
+    <div className = " min-h-screen bg-white"> 
       {!hideNavbar && <Navbar />}
-      <div className = "flex-1 overflow-auto">
+      <div className = " overflow-auto">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />}/>

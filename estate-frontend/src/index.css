@@ -14,11 +14,78 @@ body {
 .navbar {
   display: flex;
   flex-direction: column;
-  width: 240px;
+  width: 250px;
   min-height: 100vh;
   padding: 35px;
   border-right: 1px solid #e5e7eb;
+  background: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+
+  z-index: 1000;
 }
+.navbar.open {
+  transform: translateX(0);
+}
+
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+}
+
+.close-sidebar {
+  position: absolute;
+  top: 6px;
+  right: -48px;
+  background: rgba(0,0,0, 0.25);
+  color:white; 
+  border: 1px solid white;
+  border-radius: 20%;
+  cursor: pointer;
+  padding: 8px;
+
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 70px;
+  top: 0;
+  padding: 0 40px;
+  background: white;
+  border-bottom: 2px solid #e5e7eb;
+  position: sticky;
+  z-index: 800; 
+}
+
+.topbar button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+
+.search-bar {
+  flex: 1;
+  max-width: 1000px;
+  padding: 10px 16px;
+  border: 1px solid black;
+  border-radius: 25px;
+  outline: none;
+  margin-left: 100px;
+}
+
 
 .navbar-links {
   display: flex;
@@ -47,7 +114,6 @@ body {
   color: #2563eb;
   font-size: 1.5rem;
   font-weight: bold;
-  margin-bottom: 45px;
 }
 
 .app-name-left {
@@ -72,13 +138,21 @@ body {
   background-color: #f3f4f6;
 }
 
-.login {
-  margin-top: auto;
+.nav-login {
   text-align: center;
-  background-color: white;
-  border: 2px solid black;
-
+  margin-left: auto;
+  font-size: 19px;
+  font-weight: normal;
+  color: rgb(9, 104, 246);
 }
+
+.nav-account {
+  text-align: center;
+  margin-left: auto;
+  font-size: 18px;
+  font-weight: normal;
+}
+
 
 
 
