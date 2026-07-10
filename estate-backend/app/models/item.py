@@ -1,4 +1,5 @@
 from sqlalchemy import String, Float, DateTime, ForeignKey, func, Enum
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.postgres import Base
 import uuid, enum
@@ -13,7 +14,7 @@ class Item(Base):
     __tablename__ = "items"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[ItemStatus] = mapped_column(Enum(ItemStatus), default=ItemStatus.draft)
     image_url: Mapped[str] = mapped_column(String, nullable=True)
