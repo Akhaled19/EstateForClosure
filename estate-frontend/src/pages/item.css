@@ -312,6 +312,24 @@
 
 }
 
+.ip-countdown {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #1B2A4A;
+    letter-spacing: -0.02em;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.ip-countdown-ended {
+    font-size: 13px;
+    font-weight: 500;
+    color: #D4621A;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
 @media (max-width: 768px) {
     .ip-page {
         padding: 24px 20px;
@@ -325,3 +343,4 @@
         width: 100%;
     }
 }
+
