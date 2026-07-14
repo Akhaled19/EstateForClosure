@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
+import Countdown from '../components/Countdown';
 
 import "./item.css";
 
@@ -15,6 +16,7 @@ const mockItem = {
     ebayStatus: "Active Listing",
     description: "Dining table from the 1970s. Minor surface scratches on one end, otherwise in great shape. Seats 6 comfortably.",
     images: [],
+    listing_end: "2026-07-15T23:59:59Z"
 };
 
 export default function ItemPage() {
@@ -126,8 +128,9 @@ export default function ItemPage() {
                     </div>
 
                     <div className="ip-timer">
-                        <p className="section-title">Countdown Timer</p>
-                        {/*  cdoe for the timer goes here. to let user know how much time they have */}
+                        <p className="section-title">Time Remaining</p>
+                        <Countdown listingEnd={item.listing_end} />
+
                     </div>
 
 
