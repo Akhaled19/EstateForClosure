@@ -3,7 +3,7 @@ export default function SellingCard() {
     <div className="bg-white rounded-xl shadow-sm p-4">
 
       <h2 className="text-xl font-bold mb-3 text-[rgb(27,42,74)]">
-        Selling Overview
+        Selling Statistics
       </h2>
 
 
@@ -40,7 +40,7 @@ export default function SellingCard() {
         </div>
 
         <div className="font-bold">
-          7
+          14
         </div>
 
       </div>

@@ -3,7 +3,7 @@ export default function FinanceCard() {
     <div className="bg-white rounded-xl shadow-sm p-4">
 
       <h2 className="text-xl font-bold mb-3 text-[rgb(27,42,74)]">
-        Finance Overview
+        Finance Statistics
       </h2>
 
 
