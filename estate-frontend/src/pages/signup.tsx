@@ -21,13 +21,10 @@ export default function SignUp() {
       return;
     }
 
-    https://storyset.com/illustration/moving/pana#D4621AFF&hide=speech-bubble&hide=complete
-
     setLoading(true);
 
     try {
-      const data = await registerUser(fullName, email, password);
-      localStorage.setItem("token", data.access_token);
+      await registerUser(fullName, email, password);
       naviagte("/dashboard");
     } catch (err) {
       setError(err.message);
