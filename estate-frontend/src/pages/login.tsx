@@ -22,8 +22,8 @@ export default function Login() {
     } finally {
       setLoading(false);
   };
-
-
+  }
+  
   return (
     <div className="lp-page">
       <div className="lp-left">
