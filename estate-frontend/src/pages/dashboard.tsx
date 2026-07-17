@@ -1,69 +1,41 @@
-import Card from "../components/Cards";
+import StatsCard from "../components/Dashboard/StatsCard";
+import Revenue from "../components/Dashboard/Revenue";
+import FinanceCard from "../components/Dashboard/FinanceCard";
+import SellingCard from "../components/Dashboard/SellingCard";
+
 
 export default function Dashboard() {
   return (
     <div className="dashboard">
+      <div className = "dashboard-wrapper">
+        <div className = "mb-8"> 
+            <h1 className = "text-3xl font-bold"> 
+              Dashboard
+            </h1>
 
-      <div className="content pt-5">
-
-        <div className="text-[30px] text-black ml-5">
-          Your Dashboard:
-        </div>
-
-        <div className="item-cards flex justify-center gap-5 flex-wrap mt-6">
-
-          <div className="underline p-5 text-black text-center">
-            Recent
-          </div>
-
-          <div className="underline p-5 text-black  text-center">
-            Currently Listed
-          </div>
-
-          <div className="underline p-5 text-black  text-center">
-            Sold
-          </div>
-
-          <div className="underline p-5 text-black text-center">
-            Shipped
-          </div>
-
-          <div className="underline p-5 text-black text-center">
-            Family & Friends
-          </div>
+            <div className = "text-gray-500 mt-2">
+              Here's an general overview of your estate.
+            </div>
 
         </div>
 
+        <div className = "cards"> 
+            <StatsCard name = "Inventory" value = {25} />
+            <StatsCard name = "Listings" value = {9} />
+            <StatsCard name = "Sold" value = {13} />
+            <StatsCard name = "Shipped" value = {5} />
 
-        <div className = "mt-8 ml-45 space-y-4">
-          <Card 
-          title = "Chair"
-          description = "Chair in good condition"
-          status = "Listed"
-          price = "$25"
-          />
+        </div> 
 
-          <Card 
-          title = "Mattress"
-          description = "King mattress, in perfect condition"
-          status = "Sold"
-          price = "$100"
-          
-          />
-          <Card 
-          title = "Couch"
-          description = "Couch, in mild condition"
-          status = "Inventory"
-          price = "$75"
-          />
+        <Revenue/>
 
+        <div className = "grid grid-cols-2 gap-6 mt-8"> 
+          <FinanceCard/> 
+          <SellingCard/>
         </div>
-
-
-
 
       </div>
-
+      
     </div>
   );
 }
