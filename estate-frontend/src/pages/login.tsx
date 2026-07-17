@@ -15,17 +15,15 @@ export default function Login() {
     setLoading(true);
     setError("");
     try {
-      const data = await loginUser(email, password);
-      localStorage.setItem("token", data.access_token);
+      await loginUser(email, password);
       naviagte("/dashboard");
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
-    }
   };
-
-
+  }
+  
   return (
     <div className="lp-page">
       <div className="lp-left">
