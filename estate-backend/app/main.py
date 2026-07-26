@@ -12,6 +12,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def ensure_indexes():
+    from app.db.mongo import db 
+    await db["item_scan_drafts"].create_index("item_id", unique=True)
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
