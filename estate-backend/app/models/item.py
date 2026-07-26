@@ -10,6 +10,14 @@ class ItemStatus(str, enum.Enum):
     sold = "sold"
     shipped = "shipped"
 
+
+class ItemCondition(str, enum.Enum):
+    new = "New"
+    like_new = "Like New"
+    good = "Good"
+    fair = "Fair"
+    poor = "Poor"
+
 class Item(Base):
     __tablename__ = "items"
 
@@ -24,3 +32,8 @@ class Item(Base):
     mongo_metadata_id: Mapped[str] = mapped_column(String, nullable=True)  # ref to MongoDB doc
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    description: Mapped[str] = mapped_column(String, nullable=True)
+    category: Mapped[str] = mapped_column(String, nullable=True)
+    condition: Mapped[ItemCondition] = mapped_column(Enum(ItemCondition), nullable=True)
+    brand: Mapped[str] = mapped_column(String, nullable=True)
+    dimensions: Mapped[str] = mapped_column(String, nullable=True)
