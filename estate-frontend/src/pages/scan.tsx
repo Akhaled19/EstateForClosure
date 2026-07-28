@@ -51,10 +51,27 @@ export default function Scan() {
 
         <div className = "scan-line"> </div>
 
-        <button className = "upload-button"> 
+        <input 
+          type = "file"
+          accept = "image/*"
+          id = "upload-image"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+
+            if (file) {
+              const imageURL = URL.createObjectURL(file);
+              setCapturedImage(imageURL);
+              setCurrent("review");
+            }
+
+          }}
+          />
+
+        <label htmlFor = "upload-image" className = "upload-button"> 
           <ArrowUpTrayIcon className = "w-5 h-5" />
           Upload Image
-        </button>
+        </label>
 
       </div>
 
