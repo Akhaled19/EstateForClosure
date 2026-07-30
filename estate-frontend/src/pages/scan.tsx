@@ -1,6 +1,6 @@
 import { CameraIcon } from "@heroicons/react/24/outline";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Video from "../components/Camera/Video";
 import Review from "../components/Camera/Review";
 
@@ -10,6 +10,8 @@ export default function Scan() {
   
   const [current, setCurrent] = useState("scan");
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+  const uploadRef = useRef<HTMLInputElement>(null);
 
   if (current === "review") {
     return (
@@ -52,9 +54,9 @@ export default function Scan() {
         <div className = "scan-line"> </div>
 
         <input 
+          ref = {uploadRef}
           type = "file"
           accept = "image/*"
-          id = "upload-image"
           hidden
           onChange={(e) => {
             const file = e.target.files?.[0];
@@ -65,13 +67,19 @@ export default function Scan() {
               setCurrent("review");
             }
 
+            e.target.value = "";
+
           }}
           />
 
-        <label htmlFor = "upload-image" className = "upload-button"> 
+        <button 
+          className = "upload-button"
+          onClick = {() => uploadRef.current?.click()}
+        > 
+        
           <ArrowUpTrayIcon className = "w-5 h-5" />
           Upload Image
-        </label>
+        </button>
 
       </div>
 
