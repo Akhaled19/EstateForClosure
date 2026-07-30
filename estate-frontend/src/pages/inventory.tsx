@@ -18,7 +18,7 @@ export default function Inventory() {
 
         <Link
         to="/scan"
-        className="bg-blue-500 text-black px-6 py-3 rounded-lg text-lg cursor-pointer hover:bg-blue-600"
+        className="bg-blue-500 text-black px-6 py-3 rounded-full text-lg cursor-pointer hover:bg-blue-600"
         >
           Scan New Item
         </Link>
