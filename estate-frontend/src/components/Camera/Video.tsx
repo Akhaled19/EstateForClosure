@@ -72,7 +72,7 @@ export default function Video({
       context.drawImage(video, 0, 0);
     }
 
-    const image = canvas.toDataURL("image/png", 0.9);
+    const image = canvas.toDataURL("image/jpeg", 0.9);
     
     setCapturedImage(image);
 
