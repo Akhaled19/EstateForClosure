@@ -9,6 +9,7 @@ pydantic-settings
 python-dotenv
 python-multipart
 supabase
+dramatiq[redis]
 dnspython
 psycopg2-binary
 email-validator
