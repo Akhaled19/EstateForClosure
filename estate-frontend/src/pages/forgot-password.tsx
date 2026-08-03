@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import movingImg from "../assets/Moving-pana.svg";
 import "./forgot-password.css";
-// import { forgotPassword } from "../services/auth";
+import { forgotPassword } from "../services/auth";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -18,7 +18,7 @@ export default function ForgotPassword() {
       await forgotPassword(email);
       setSuccess(true);
     } catch (err) {
-      setError(err.message);
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
