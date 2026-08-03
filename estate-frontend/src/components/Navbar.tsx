@@ -39,15 +39,7 @@ export default function Navbar() {
           className = "search-bar"
         />
 
-        {signedIn ? (
-          <Link to = "/account" className = "nav-link nav-account">
-              My Account
-          </Link>
-        ) : (
-          <Link to = "/login" className = "nav-link nav-login underline">
-            Sign In
-          </Link>
-        )}
+
 
       </div>
       {
@@ -87,6 +79,26 @@ export default function Navbar() {
               );
             
             })}
+            </div>
+
+            <div className="sidebar-signIn nav-link">
+              {signedIn ? (
+                <Link
+                  to="/account"
+                  onClick={() => setOpenSidebar(false)}
+                  className="nav-link sidebar-account"
+                >
+                  My Account
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setOpenSidebar(false)}
+                  className="nav-link sidebar-login"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
 
         </div>

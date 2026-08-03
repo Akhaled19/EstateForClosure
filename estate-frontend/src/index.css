@@ -15,8 +15,9 @@ body {
   display: flex;
   flex-direction: column;
   width: 250px;
-  min-height: 100vh;
-  padding: 35px;
+  height: 100dvh;
+  padding: 25px;
+  box-sizing: border-box;
   border-right: 1px solid #e5e7eb;
   background: white;
   position: fixed;
@@ -26,7 +27,9 @@ body {
   transition: transform 0.3s ease;
 
   z-index: 1000;
+  overflow: hidden;
 }
+
 .navbar.open {
   transform: translateX(0);
 }
@@ -37,7 +40,7 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 999;
 }
@@ -54,6 +57,18 @@ body {
   padding: 8px;
 
 }
+
+.sidebar-signIn {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.sidebar-signIn a {
+  color: rgb(9, 104, 246);
+  text-decoration: underline;
+  font-size: 18px;
+}
+
 
 .topbar {
   display: flex;
@@ -85,6 +100,25 @@ body {
   outline: none;
   margin-left: 100px;
 }
+
+@media (max-width: 600px) {
+  .topbar {
+    gap: 10px;
+    padding: 0 15px;
+  }
+
+  .navbar-title {
+    font-size: 1.1rem;
+  }
+
+  .search-bar {
+    margin-left: 0;
+    min-width: 0;
+    width: 100%;
+    padding: 8px 12px;
+  }
+}
+
 
 
 .navbar-links {
@@ -138,20 +172,7 @@ body {
   background-color: #f3f4f6;
 }
 
-.nav-login {
-  text-align: center;
-  margin-left: auto;
-  font-size: 19px;
-  font-weight: normal;
-  color: rgb(9, 104, 246);
-}
 
-.nav-account {
-  text-align: center;
-  margin-left: auto;
-  font-size: 18px;
-  font-weight: normal;
-}
 
 
 /* Dashboard */
@@ -198,4 +219,264 @@ body {
 .card-values {
   color: rgb(212, 98, 26);
   font-weight: bold;
+}
+
+
+/* Scan page */
+
+.scan-page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100dvh - 70px);
+  position: relative;
+}
+
+
+.scan-button, .upload-button {
+  color: white;
+  background-color: rgb(9, 104, 246);
+  border-radius: 1000px;
+  font-size: 20px;
+  padding: 16px 32px;
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.scan-button, .upload-button, .scan-line {
+  width: 350px;
+  max-width: 80%;
+}
+
+.scan-button:active, .upload-button:active {
+  background-color: rgb(3, 82, 219);
+}
+
+.scan-line {
+  height: 1px;
+  background-color: black;
+  margin: 24px 0;
+}
+
+.scan-desc {
+  color: black;
+  font-weight: bold;
+  font-size: 25px;
+  text-align: center;
+  max-width: 350px;
+  margin-bottom: 30px;
+  width: 90%;
+  line-height: 1.5;
+
+  position: absolute;
+  top: 40px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
+
+}
+
+.scan-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.camera-page {
+  position: relative;
+  width: 100vw;
+  height: calc(100dvh - 70px);
+  overflow: hidden;
+  background: black;
+}
+
+.camera-tools {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 120px;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.video-cam {
+  width: 100%;
+  height: calc(100dvh - 190px);
+  max-width: 400px;
+  border-radius: 12px;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+
+.capture-button {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: transparent;
+  border: 5px solid white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.capture-circle {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: white;
+}
+
+.capture-button:active .capture-bar {
+  transform: scale(0.95);
+}
+
+
+.review-image {
+  width: 90%;
+  max-width: 500px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 12px;
+  display: flex;
+  margin: 0 auto;
+}
+
+.review-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  gap: 20px;
+  min-height: 100vh;
+  justify-content: center;
+}
+
+.review-title {
+  display: flex;
+  justify-content: center;
+  font-weight: bold;
+}
+.review-content {
+  width: 100%;
+  max-width: 400px;
+  background: #EBEBEB;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: -75px;
+}
+.review-form {
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.review-form input,
+.review-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid gray;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+}
+
+.review-form textarea {
+  height: 120px;
+  resize: none;
+}
+
+.review-buttons {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.review-buttons button {
+  flex: 1;
+  padding: 14px;
+  border-radius: 999px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.save-button {
+  background-color: green;
+  color: white;
+  border: 2px solid green
+}
+
+.cancel-button {
+  background-color: red;
+  color: white;
+  border: 2px solid red;
+}
+
+.review-buttons button:active {
+  transform: scale(0.96);
+}
+
+
+.review-camera {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: black;
+  overflow: hidden;
+  z-index: 900;
+}
+
+.preview-image {
+  width: 100%;
+  height: calc(100dvh - 100px);
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.photo-buttons {
+  display: flex;
+  width: 100%;
+  height: 100px;
+  min-height: 100px;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  background: black;
+  flex-shrink: 0;
+}
+
+.retake-button,
+.confirm-button {
+  padding: 12px 25px;
+  border-radius: 999px;
+  border: none;
+  background:#5E5E5E;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+.confirm-button {
+  padding-left: 35px;
+  padding-right: 35px;
 }
