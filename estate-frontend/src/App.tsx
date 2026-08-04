@@ -8,11 +8,13 @@ import Scan from "./pages/scan";
 import Login from "./pages/login";
 import SignUp from "./pages/signup";
 import ItemPage from "./pages/item";
+import ForgotPassword from "./pages/forgot-password";
+import ResetPassword from "./pages/reset-password";
 
 
 function Layout() {
   const location = useLocation();
-  const hideNavbar = ["/login", "/signup"].includes(location.pathname);
+  const hideNavbar = ["/login", "/signup", "/forgot-password", "/reset-password"].includes(location.pathname);
 
   return (
     <div className = " min-h-screen bg-white"> 
@@ -27,6 +29,8 @@ function Layout() {
           <Route path="/login" element={<Login />}/>
           <Route path="/signup" element={<SignUp />}/>
           <Route path="/items/:id"  element={<ItemPage />}/>
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </div>
     </div>

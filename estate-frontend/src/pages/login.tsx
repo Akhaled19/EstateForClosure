@@ -63,7 +63,7 @@ export default function Login() {
         {error && <p className="lp-error">{error}</p>}
 
         <div className="lp-row">
-          <a href="#" className="lp-forgot">Forgot password?</a>
+          <a className="lp-forgot" onClick={() => naviagte('/forgot-password')}>Forgot password?</a>
         </div>
 
         <button className="lp-btn" onClick={handleLogin} disabled={loading}>
