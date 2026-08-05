@@ -7,8 +7,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.worker import broker 
 from app.core.config import settings
-from app.services.Vision_service import analyze_item_image, VisionAnalysisError
-from app.services import item_scan_draft_service as draft_service 
+from app.services.vision_service import analyze_item_image, VisionAnalysisError
+from app.services import item_scan_draft_service as draft_service
 
 logger = logging.getLogger(__name__)
 

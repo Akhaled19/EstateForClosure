@@ -19,3 +19,8 @@ class ItemScanDraft(BaseModel):
     error: Optional[str] = None 
     created_at: datetime = Field(default_factory = datetime.utcnow)
     processed_at: Optional[datetime] = None 
+
+class ScanResponse(BaseModel):
+    item_id: str
+    ai_status: str 
+    image_url: str 

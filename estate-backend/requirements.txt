@@ -13,3 +13,4 @@ dramatiq[redis]
 dnspython
 psycopg2-binary
 email-validator
+anthropic
