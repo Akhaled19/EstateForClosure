@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.postgres import engine, Base
+from app.routers import items
+
+import app.models 
 
 app = FastAPI(title="Estate App API", version="1.0.0")
 
@@ -11,6 +14,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(items.router)
 
 @app.on_event("startup")
 async def ensure_indexes():
