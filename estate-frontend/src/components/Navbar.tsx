@@ -7,7 +7,8 @@ const navLinks = [
   { path: "/dashboard", name: "Dashboard"},
   { path: "/inventory", name: "Inventory"},
   { path: "/listings", name: "Listings"},
-  { path: "/scan", name: "Scan new item"}
+  { path: "/scan", name: "Scan new item"},
+  { path: "/familyFriends", name: "Family & Friends" }
 ];
 
 
