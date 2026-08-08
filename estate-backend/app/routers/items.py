@@ -32,7 +32,14 @@ async def scan_item(
     if len(image_bytes) > MAX_IMAGE_BYTES:
         raise HTTPException(400, "image too large (max 10MB)")
     
-    image_url = upload_item_image(image_bytes, file.content_type, str(current_user.id))
+    try: 
+        image_url = upload_item_image(image_bytes, file.content_type, str(current_user.id))
+    except Exception as e:
+        logger.error("Image upload failed: %s", e)
+        raise HTTPException(502, "Failed to upload image, please try again")
+
+    if not image_url:
+        raise HTTPException(502, "Image upload did not return a valid URL")
 
     item = Item(
         user_id = current_user.id,

@@ -25,7 +25,7 @@ class Item(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[ItemStatus] = mapped_column(Enum(ItemStatus), default=ItemStatus.draft)
-    image_url: Mapped[str] = mapped_column(String, nullable=True)
+    image_url: Mapped[str] = mapped_column(String, nullable=False)
     asking_price: Mapped[float] = mapped_column(Float, nullable=True)
     sold_price: Mapped[float] = mapped_column(Float, nullable=True)
     ebay_listing_id: Mapped[str] = mapped_column(String, nullable=True)
