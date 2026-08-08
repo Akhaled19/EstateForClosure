@@ -24,3 +24,9 @@ class ScanResponse(BaseModel):
     item_id: str
     ai_status: str 
     image_url: str 
+
+class ItemDetailResponse(BaseModel):
+    id: str
+    is_finalized: bool
+    status: str
+    image_url: str
