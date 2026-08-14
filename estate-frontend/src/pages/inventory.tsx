@@ -61,7 +61,7 @@ export default function Inventory() {
             className="inventory-button inven-scan-button"
           >
             <PlusIcon className="scan-icon" />
-            <span className = "text-[#1b2a4a]"> Scan New Item </span>
+            <span className = "text-[#1b2a4a]"> Add Item </span>
 
           </Link>
 

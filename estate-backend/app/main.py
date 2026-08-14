@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.postgres import engine, Base
 from app.routers import items
+from app.routers import item_interest_router
+from app.routers import FamilyFriendUsers_router
+
 
 import app.models 
 
@@ -15,6 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(items.router)
+app.include_router(item_interest_router.router)
+app.include_router(FamilyFriendUsers_router.router)
 
 @app.on_event("startup")
 async def ensure_indexes():

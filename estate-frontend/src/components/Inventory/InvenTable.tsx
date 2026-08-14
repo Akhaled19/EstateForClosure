@@ -46,7 +46,7 @@ export type Item = {
       title: "Table",
       description: "Table in good condition, minor scratches on the surface.",
       status: "Shipped",
-      date: "07/2/2026",
+      date: "07/3/2026",
       sharedWithFamily: false,
     },
     {
@@ -54,7 +54,7 @@ export type Item = {
       title: "Vase",
       description: "Glass vase in good condition, no visible damage.",
       status: "Unlisted",
-      date: "07/2/2026",
+      date: "07/5/2026",
       sharedWithFamily: false,
     },
   ];
@@ -97,10 +97,10 @@ export default function InvenTable() {
       />
 
       <div className = "flex justify-center mt-6 overflow-visible"> 
-        <table className="w-fit bg-white shadow-lg rounded-xl">
+        <table className="w-[600px] bg-white shadow-lg rounded-xl table-fixed">
             <colgroup>
               <col className="w-[80px]" />  
-              <col className = "w-[250px]" />  
+              <col className = "w-[300px]" />  
               <col className="w-[120px]" />  
             </colgroup>
           <thead>

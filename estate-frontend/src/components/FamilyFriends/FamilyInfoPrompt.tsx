@@ -11,8 +11,9 @@ export default function FamilyInfoPrompt({onComplete}: Prop) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+  const [submittingInfo, setSubmittingInfo] = useState(false);
 
-  function validateAndSubmit() {
+  async function validateAndSubmit() {
     if (!name.trim() || !phone.trim()) {
       setError("Missing information. Please fill in all fields.");
       return;
@@ -26,7 +27,34 @@ export default function FamilyInfoPrompt({onComplete}: Prop) {
     }
 
     setError("");
-    onComplete();
+    setSubmittingInfo(true);
+
+    try {
+      const response = await fetch("http://localhost:8000/family-friend-users/", 
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: name.trim(), phone: phone.trim() }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to create F&F user.");
+      }
+
+      const user = await response.json();
+
+      localStorage.setItem("family_friend_user_id", user.id);
+
+      onComplete();
+    } catch (error) {
+        console.error(error);
+        setError("Error submitting information.");
+    } finally {
+        setSubmittingInfo(false);
+    }
   }
 
   return (
@@ -92,9 +120,11 @@ export default function FamilyInfoPrompt({onComplete}: Prop) {
 
         <button
           onClick = {validateAndSubmit}
+          disabled = {submittingInfo}
           className = "mt-6 w-full bg-[#d4621a] text-white py-2 rounded-xl hover:opacity-90"
         >
-          Continue
+          {submittingInfo ? "Submitting..." : "Continue"}
+
         </button>
 
 

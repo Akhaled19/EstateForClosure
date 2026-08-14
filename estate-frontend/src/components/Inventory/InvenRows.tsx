@@ -54,7 +54,7 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
                 </button>
 
                 <button className = "actions-buttons">
-                  Create listing
+                  Create eBay Listing
                 </button>
 
                 <button className = "actions-buttons">
@@ -74,10 +74,13 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
 
           <div className = "flex items-center gap-4"> 
             
-            <div className = "w-16 h-16 bg-gray-300 rounded-xl shrink-0"> </div>
+            <div className = "w-16 h-16 bg-gray-300 rounded-xl shrink-0"> </div> 
 
-
-            <div className = "font-bold whitespace-nowrap text-[#1b2a4a]"> {item.title} </div>
+            <div className = "min-w-0 flex-1"> 
+              <div className = "font-bold truncate max-w-[300px] text-[#1b2a4a] text-sm" title = {item.title}> {item.title} </div>
+            
+              <div className = "text-sm text-gray-500 mt-1"> Added on {item.date}</div>
+            </div>
 
           </div>
 

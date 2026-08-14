@@ -7,56 +7,51 @@ import FamilyGrid from "../components/FamilyFriends/FamilyGrid";
 const mockItems = [
   {
     id: "1",
-    title: "Samsung Class Crystal UHD U7900F 4K Smart TV",
-    image_url: "",
+    title: "Couch",
+    image_url: "/temp-couch.avif",
     interest_count: 3,
     status: "Unclaimed!"
   },
   {
     id: "2",
-    title: "Lofka Cloud Couch Sectional",
-    image_url: "/temp-couch.avif",
+    title: "Mattress",
+    image_url: "",
     interest_count: 0,
     status: "Claimed!"
   },
   {
     id: "3",
-    title: "Samsung Class Crystal UHD U7900F 4K Smart TV",
+    title: "Wooden chair",
     image_url: "",
     interest_count: 3,
     status: "Unclaimed!"
   },
   {
     id: "4",
-    title: "Lofka Cloud Couch Sectional",
+    title: "Table",
     image_url: "",
     interest_count: 0,
     status: "Unclaimed!"
   },
   {
     id: "5",
-    title: "Vizio Quantum 4K QLED HDR Smart TV",
+    title: "Vase",
     image_url: "",
     interest_count: 1,
     status: "Unclaimed!"
   },
-  {
-    id: "6",
-    title: "Insignia Class F50 Series LED 4K UHD Smart Fire TV",
-    image_url: "",
-    interest_count: 0,
-    status: "Claimed!"
-  }
 ];
+
+
 
 
 export default function FamilyShare() {
 
   const { ownerID } = useParams();
-  const [enteredInfo, setEnteredInfo] = useState(false);
+  const [enteredInfo, setEnteredInfo] = useState(() => localStorage.getItem("family_friend_user_id") !== null);
 
   return (
-    <div className = "h-[calc(100vh-70px)] bg-gray-200">
+    <div className = "h-[calc(100vh-70px)] bg-gray-100">
 
       {!enteredInfo ? (
         <div className = "h-full flex justify-center items-center"> 

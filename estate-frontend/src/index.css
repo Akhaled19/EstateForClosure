@@ -518,8 +518,8 @@ body {
 .inven-scan-button {
   background-color: #3b82f6;
   color: black;
-  min-width: 140px;
-  max-width: 140px;
+  min-width: 120px;
+  max-width: 120px;
 }
 
 .share-icon {
@@ -703,4 +703,22 @@ body {
 
 .interested-button:hover {
   opacity: 0.9;
+}
+
+.family-owner-view-container {
+  background-color: white;
+  min-height: calc(100vh - 170px);
+  padding: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .family-owner-view-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .family-owner-view-container {
+    padding: 1rem;
+  }
 }
