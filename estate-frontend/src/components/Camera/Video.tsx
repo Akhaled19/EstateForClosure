@@ -5,12 +5,16 @@ type VideoProp = {
   capturedImage: string | null;
   setCapturedImage: React.Dispatch<React.SetStateAction<string | null>>;
   onConfirm: () => void;
+  uploading: boolean;
+  uploadError: string | null;
 };
 
 export default function Video({
   capturedImage,
   setCapturedImage,
   onConfirm,
+  uploading,
+  uploadError,
 }: VideoProp) {
 
 
@@ -112,15 +116,21 @@ export default function Video({
       { capturedImage && (
         <div className = "review-camera">
           <img src = {capturedImage} className = "preview-image" />
+
+          {uploadError && (
+            <div className="upload-error-banner"> 
+              {uploadError}
+            </div>
+          )}
           
           <div className = "photo-buttons"> 
 
-            <button className = "retake-button" onClick = {retake}> 
+            <button className = "retake-button" onClick = {retake} disabled={uploading}> 
               Retake photo
             </button>
 
-            <button className = "confirm-button" onClick = {onConfirm}>
-              Confirm
+            <button className = "confirm-button" onClick = {onConfirm} disabled={uploading}>
+              {uploading ? "uploading..." : uploadError ? "Try Again" : "Confirm"}
             </button>
 
           </div> 
