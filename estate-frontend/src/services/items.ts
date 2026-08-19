@@ -36,7 +36,7 @@ export type ItemDetail = {
   is_finalized: boolean;
   status: string;
   image_url: string;
-  titel: string | null;
+  title: string | null;
   description: string | null;
   category: string | null;
   condition: string | null;
@@ -51,7 +51,7 @@ export type ItemDetail = {
   ai_brand: string | null;
   ai_estimated_value_low: number | null;
   ai_estimated_value_high: number | null;
-  ai_dimensions_estimate: number | null;
+  ai_dimensions_estimate: string | null;
   ai_confidence: string | null;
   ai_error: string | null;
 };
