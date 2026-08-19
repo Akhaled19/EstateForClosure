@@ -30,3 +30,38 @@ export async function scanItem(imageblob: blob): Promise<ScanResponse> {
   }
   return res.json();
 }
+
+export type ItemDetail = {
+  id: string;
+  is_finalized: boolean;
+  status: string;
+  image_url: string;
+  titel: string | null;
+  description: string | null;
+  category: string | null;
+  condition: string | null;
+  brand: string | null;
+  dimensions: string | null;
+  asking_price: number | null;
+  ai_status: string | null;
+  ai_title_suggestion: string | null;
+  ai_description_draft: string | null;
+  ai_category: string | null;
+  ai_condition: string | null;
+  ai_brand: string | null;
+  ai_estimated_value_low: number | null;
+  ai_estimated_value_high: number | null;
+  ai_dimensions_estimate: number | null;
+  ai_confidence: string | null;
+  ai_error: string | null;
+};
+
+export async function getItem(itemId: string): Promise<ItemDetail> {
+  const res = await fetch(`${API_BASE}/items/${itemId}`, {
+    headers: await authHeaders(),
+  });
+  if(!res.ok){
+    throw new Error(`Failed to load item: ${res.status}`);
+  }
+  return res.json();
+}
