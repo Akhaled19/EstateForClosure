@@ -7,6 +7,8 @@ type VideoProp = {
   onConfirm: () => void;
   uploading: boolean;
   uploadError: string | null;
+  source: "camera" | "upload";
+  onRetakeUpload: () => void;
 };
 
 export default function Video({
@@ -15,6 +17,8 @@ export default function Video({
   onConfirm,
   uploading,
   uploadError,
+  source,
+  onRetakeUpload,
 }: VideoProp) {
 
 
@@ -93,6 +97,7 @@ export default function Video({
 
   }
 
+  const handleRetake = source === "upload" ? onRetakeUpload : retake;
 
   return ( 
     <div className = "camera-page">
@@ -125,7 +130,7 @@ export default function Video({
           
           <div className = "photo-buttons"> 
 
-            <button className = "retake-button" onClick = {retake} disabled={uploading}> 
+            <button className = "retake-button" onClick = {handleRetake} disabled={uploading}> 
               Retake photo
             </button>
 

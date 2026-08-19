@@ -26,6 +26,7 @@ export default function Scan() {
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [source, setSource] = useState<"camera" | "upload">("camera");
   const uploadRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -46,6 +47,12 @@ export default function Scan() {
     }
   }
 
+  function handleRetakeUpload() {
+    setCapturedFile(null);
+    setCapturedImage(null);
+    uploadRef.current?.click();
+  }
+
   if (current === "camera") {
     return (
       <Video
@@ -54,6 +61,8 @@ export default function Scan() {
         onConfirm = {handleConfirm}
         uploading = {uploading}
         uploadError = {uploadError}   
+        source={source}
+        onRetakeUpload={handleRetakeUpload}
       />
       );
     }
