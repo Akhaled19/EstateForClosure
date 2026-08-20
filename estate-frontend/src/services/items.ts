@@ -15,7 +15,7 @@ async function authHeaders(): Promise<HeadersInit> {
 }
 
 
-export async function scanItem(imageblob: blob): Promise<ScanResponse> {
+export async function scanItem(imageblob: Blob): Promise<ScanResponse> {
   const formData = new FormData();
   formData.append("file", imageblob, "capture.jpg");
 
@@ -63,5 +63,32 @@ export async function getItem(itemId: string): Promise<ItemDetail> {
   if(!res.ok){
     throw new Error(`Failed to load item: ${res.status}`);
   }
+  return res.json();
+}
+
+export type ItemFinalizePayLoad = {
+  title: string;
+  description: string;
+  category: string;
+  condition: string;
+  brand?: string;
+  dimensions?: string;
+  price: number
+}
+
+export async function finalizeItem(itemId: string, payload: ItemFinalizePayLoad): Promise<ItemDetail> {
+  const res = await fetch(`${API_BASE}/items/${itemId}/finalize`, {
+    method: "PATCH",
+    headers : {
+      ...(await authHeaders()),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if(!res.ok) {
+    throw new Error(`Failed to save item: ${res.status}`);
+  }
+
   return res.json();
 }
