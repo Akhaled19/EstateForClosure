@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getItem, type ItemDetail } from "../services/items";
+import { finalizeItem, getItem, type ItemDetail } from "../services/items";
 
 const CATEGORIES = [
   "Furniture", "Kitchenware", "Electronics", "Jewelry", "Art & Decor",
@@ -14,6 +14,8 @@ export default function Review() {
 
   const [loading, setLoading] = useState(true);
   const [scanFailed, setScanFailed] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<String | null>(null);
   const [item, setItem] = useState<ItemDetail | null>(null);
 
   const [title, setTitle] = useState("");
@@ -87,7 +89,7 @@ export default function Review() {
     };
   }, [id]);
 
-  function saveItem() {
+  async function saveItem() {
     if (!title.trim()) {
       alert("Please enter a title");
       return;
@@ -104,8 +106,30 @@ export default function Review() {
       alert("Please select a condition");
       return;
     }
-    console.log({ title, description, category, condition, brand, dimensions, price });
-    // TODO: call PATCH /items/{id}/finalize once built
+    if(!price || isNaN(parseFloat(price))){
+      alert("Please enter a valid price");
+      return;
+    }
+    if (!id) return;
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      await finalizeItem(id, {
+        title,
+        description,
+        category,
+        condition,
+        brand: brand || undefined,
+        dimensions: dimensions || undefined,
+        price: parseFloat(price),
+      });
+      navigate("/inventory");
+    } catch (err) {
+      setSaveError("Something went wrong saving your item. Please try again.");
+      setSaving(false);
+    }
   }
 
   function handleCancel() {
@@ -194,8 +218,16 @@ export default function Review() {
           />
         </div>
 
+        {saveError && (
+          <div className="review-warning">
+            {saveError}
+          </div>
+        )}
+
         <div className="review-buttons">
-          <button className="save-button" onClick={saveItem}>Save item</button>
+          <button className="save-button" onClick={saveItem} disabled={saving}>
+            {saving ? "Saving..." : "Save item"}
+          </button>
           <button className="cancel-button" onClick={handleCancel}>Cancel</button>
         </div>
       </div>
