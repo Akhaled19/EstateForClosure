@@ -1,47 +1,99 @@
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+
+
+
 type Item = {
+  id: string;
   title: string;
   description: string;
   status: string;
   date: string;
+  sharedWithFamily: boolean;
 };
 
 type Property = {
   item: Item;
+  openDropdown: string | null;
+  setOpenDropdown: (v: string | null) => void;
+  toggleFamilyShare: (id: string) => void;
 };
 
-export default function InvenRows({item}: Property) {
+export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFamilyShare}: Property) {
+
+  const showActions = (openDropdown === item.id);
+  
   return (
-    <tr className="table-row border-t border-gray-200">
+    <>
+      <tr className = "table-row border-t border-gray-200">
 
-      <td className="p-4">
+        <td className = "p-4">
+          <div className = "relative">
 
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 cursor-pointer">
-          Edit
-        </button>
+            <button 
+              onClick = {() => setOpenDropdown(showActions ? null : item.id) }
+              className="px-3 py-2 bg-gray-300 rounded-full cursor-pointer">
+            
+            <ChevronDownIcon className="w-4 h-4 ml-0.5" />
+            </button>
 
-      </td>
+            {showActions && (
+              <div className = "absolute mt-1 w-max min-w-32 bg-white rounded-xl shadow-xl border border-gray-400 z-50">
+                
+                <button className = "actions-buttons"> 
+                  Edit
+                </button>
 
-        {/* Picture */}
-      <td className="p-4"> 
-        <div className="w-25 h-25 bg-gray-300 rounded-xl"/>
-      </td>
+                <button 
+                  className = "actions-buttons" 
+                  onClick = {() => {
+                    toggleFamilyShare(item.id);
+                    setOpenDropdown(null);
+                  }}
+                >
+                  {item.sharedWithFamily ? "Unshare from F&F" : "Share to F&F"}
+                </button>
+
+                <button className = "actions-buttons">
+                  Create eBay Listing
+                </button>
+
+                <button className = "actions-buttons">
+                  Delete
+                </button>
+                
+              </div>
+            )}
+
+          </div>
+        </td>
 
 
-      <td className="p-4">
 
-        <div className="font-bold mb-1">
-            {item.title}
-        </div>
 
-        <div className="text-sm text-gray-500">
-          {item.description}
-        </div>
+        <td className = "p-4">
 
-      </td>
+          <div className = "flex items-center gap-4"> 
+            
+            <div className = "w-16 h-16 bg-gray-300 rounded-xl shrink-0"> </div> 
 
-      <td className="p-4">{item.status}</td>
-      
-      <td className="p-4">{item.date}</td>
-    </tr>
+            <div className = "min-w-0 flex-1"> 
+              <div className = "font-bold truncate max-w-[300px] text-[#1b2a4a] text-sm" title = {item.title}> {item.title} </div>
+            
+              <div className = "text-sm text-gray-500 mt-1"> Added on {item.date}</div>
+            </div>
+
+          </div>
+
+        </td>
+
+        <td className = "p-4 text-[#1b2a4a]"> {item.status} </td>
+
+
+      </tr>
+    
+
+
+    </>
+
   );
 }

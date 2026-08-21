@@ -162,6 +162,7 @@ body {
   background-color: white;
   text-align: left;
   padding: 16px;
+  color: #d4621a;
 }
 
 .table-row {
@@ -479,4 +480,245 @@ body {
 .confirm-button {
   padding-left: 35px;
   padding-right: 35px;
+}
+
+
+
+
+.actions-buttons {
+  display: block;
+  white-space: nowrap;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.inventory-button {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+
+.share-button {
+  background-color: #d4621a;
+  color: white;
+}
+
+.inven-scan-button {
+  background-color: #3b82f6;
+  color: black;
+  min-width: 120px;
+  max-width: 120px;
+}
+
+.share-icon {
+  width: 18px;
+  height: 18px;
+
+}
+
+.scan-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-right: -6px;
+}
+
+@media (max-width: 640px) {
+
+  .inventory-button {
+    height: 36px;
+    padding: 0 12px;
+
+    font-size: 13px;
+  }
+
+
+  .button-icon {
+    width: 15px;
+    height: 15px;
+  }
+
+}
+
+.copy-button {
+  background-color: #1b2a4a;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.copy-button:active {
+  transform: scale(0.95);
+}
+
+.sharelink-copied {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 350px;
+  max-width: 350px;
+  height: 46px;
+  padding: 0 16px;
+  
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: rgba(0,0,0,0.1) 0px 0px 24px 0px;
+  
+  z-index: 100;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.sharelink-copied.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+
+.family-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .family-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+.family-item-card {
+  background: white;
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border: 1px solid #d1d5db;
+  min-width: 0;
+
+}
+
+.family-card-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/1;
+  min-height: 220px;
+  overflow: hidden;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+.family-card-image img, .family-card-image-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.family-card-image-placeholder {
+  background-color: #D3D3D3;
+}
+
+.family-card-status {
+  position: absolute;
+  bottom: 0%;
+  left: 0px;
+  background: #B59410;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 8px;
+  width: 100%;
+  font-style: italic;
+}
+
+.family-card-title {
+  color: #1b2a4a;
+  font-size: 12px;
+  margin-left: 6px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  cursor: pointer;
+
+}
+
+.family-card-interested {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+
+  background: #90ee90;
+  color: black;
+  font-weight: bold;
+  font-size: 11px;
+  margin: 4px 0 8px 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.interested-button {
+  width: 95%;
+  padding: 5px;
+  margin-left: 6px;
+  margin-bottom: 4px;
+  margin-top: -2px;
+  border: none;
+  background-color: #d4621a;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 999px;
+
+  transition: 0.2s ease;
+
+}
+
+.interested-button:hover {
+  opacity: 0.9;
+}
+
+.family-owner-view-container {
+  background-color: white;
+  min-height: calc(100vh - 170px);
+  padding: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .family-owner-view-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .family-owner-view-container {
+    padding: 1rem;
+  }
 }
