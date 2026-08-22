@@ -10,7 +10,7 @@ import SignUp from "./pages/signup";
 import ItemPage from "./pages/item";
 import FamilyShare from "./pages/FamilyShare.tsx";
 import FamilyFriends from "./pages/FamilyFriendsOwner.tsx";
-import Review from "./pages/Review";
+import Review from "./pages/review";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
 
