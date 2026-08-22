@@ -33,6 +33,7 @@ class ItemDetailResponse(BaseModel):
 
     title: Optional[str] = None
     description: Optional[str] = None 
+    condition: Optional[str] = None 
     category: Optional[str] = None 
     brand: Optional[str] = None 
     dimensions: Optional[str] = None 
@@ -49,3 +50,12 @@ class ItemDetailResponse(BaseModel):
     ai_dimensions_estimate: Optional[str] = None
     ai_confidence: Optional[str] = None
     ai_error: Optional[str] = None
+
+class ItemFinalizeRequest(BaseModel):
+    title: str
+    description: str
+    category: str
+    condition: str
+    brand: Optional[str] = None 
+    dimensions: Optional[str] = None 
+    price: float 

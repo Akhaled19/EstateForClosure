@@ -10,6 +10,7 @@ import SignUp from "./pages/signup";
 import ItemPage from "./pages/item";
 import FamilyShare from "./pages/FamilyShare.tsx";
 import FamilyFriends from "./pages/FamilyFriendsOwner.tsx";
+import Review from "./pages/Review";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
 
@@ -33,6 +34,7 @@ function Layout() {
           <Route path="/items/:id"  element={<ItemPage />}/>
           <Route path="/estateItemsF&F/:ownerID" element={<FamilyShare />}/>
           <Route path="/family-friends-owner-view" element={<FamilyFriends />}/>
+          <Route path="/items/:id/review" element={<Review />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>

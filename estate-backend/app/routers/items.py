@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.postgres import get_db
 from app.db.mongo import get_mongo
 from app.core.deps import get_current_user
-from app.models.item import Item, ItemStatus
-from app.schemas.item_scan_draft import ItemScanDraft, ScanResponse, ItemDetailResponse
+from app.models.item import Item, ItemStatus, ItemCondition
+from app.schemas.item_scan_draft import ItemScanDraft, ScanResponse, ItemDetailResponse, ItemFinalizeRequest
 from app.services.storage_service import upload_item_image
 from app.services import item_scan_draft_service as draft_service 
 from app.worker.actors import run_ai_scan
@@ -19,6 +19,7 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 MAX_IMAGE_BYTES = 10 * 1024 * 1024 #10MB
 
+#insert the item into postgres 
 @router.post("/scan", response_model=ScanResponse, status_code=202)
 async def scan_item(
     file: UploadFile = File(...),
@@ -123,4 +124,52 @@ async def get_item(
         dimensions=item.dimensions,
         asking_price=item.asking_price,
         **ai_fields,
+    )
+
+#update the item's entry 
+@router.patch("/{item_id}/finalize", response_model=ItemDetailResponse)
+async def finalize_item(
+    item_id: str,
+    payload: ItemFinalizeRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    result = await db.execute(select(Item).where(Item.id == item_id))
+    item = result.scalar_one_or_none()
+
+    if item is None:
+        raise HTTPException(404, "Item not found")
+    
+    if str(item.user_id) != str(current_user.id):
+        raise HTTPException(403, "Not your item")
+
+    try:
+        condition_enum = ItemCondition(payload.condition)
+
+    except ValueError:
+        raise HTTPException(400, f"Invalid condition: {payload.condition}")
+
+    item.title = payload.title
+    item.description = payload.description
+    item.category = payload.category
+    item.condition = condition_enum
+    item.brand = payload.brand
+    item.dimensions = payload.dimensions
+    item.asking_price = payload.price
+
+    await db.commit()
+    await db.refresh(item)
+
+    return ItemDetailResponse(
+        id=item.id,
+        is_finalized=True,
+        status=item.status.value,
+        image_url=item.image_url,
+        title=item.title,
+        description=item.description,
+        category=item.category,
+        condition=item.condition.value,
+        brand=item.brand,
+        dimensions=item.dimensions,
+        asking_price=item.asking_price,
     )
