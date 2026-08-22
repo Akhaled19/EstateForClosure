@@ -1,15 +1,19 @@
-import { PlusIcon } from "@heroicons/react/24/outline"
-import { Link } from "react-router-dom";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import InvenTable from "../components/Inventory/InvenTable";
 
 import ShareLinkCopied from "../components/Share/ShareLinkCopied"
 import ShareListButton from "../components/Share/ShareListButton"
 import SharePopup from "../components/Share/SharePopup"
-
-import { useState, useRef } from "react";
+import ReviewToast from "../components/ReviewToast"
+import { useState, useRef, useEffect } from "react";
 
 
 export default function Inventory() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [showSavedToast, setShowSavedToast] = useState(false);
   const [showSharePopup, setShowSharePopup] = useState(false);
 
   const ownerID = "1";
@@ -18,6 +22,25 @@ export default function Inventory() {
   const [showCopiedPopup, setShowCopiedPopup] = useState(false);
   const copyTimeout = useRef<number | null>(null);
   
+
+  useEffect(() => {
+    if (location.state?.itemSaved !== true) {
+      return;
+    }
+
+    setShowSavedToast(true);
+
+    const timer = window.setTimeout(() => {
+      setShowSavedToast(false);
+
+      navigate("/inventory", {
+        replace: true,
+        state: null,
+      });
+    }, 4500);
+
+    return () => clearTimeout(timer);
+  }, [location.state?.itemSaved, navigate]);
 
   function copyShareLink() {
     navigator.clipboard.writeText(shareUrl);
@@ -72,7 +95,7 @@ export default function Inventory() {
 
       <InvenTable />
 
-
+      <ReviewToast show = {showSavedToast} />
       <SharePopup 
         show = {showSharePopup} 
         shareUrl={shareUrl} 

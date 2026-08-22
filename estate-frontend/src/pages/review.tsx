@@ -1,3 +1,4 @@
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { finalizeItem, getItem, type ItemDetail } from "../services/items";
@@ -125,7 +126,9 @@ export default function Review() {
         dimensions: dimensions || undefined,
         price: parseFloat(price),
       });
-      navigate("/inventory");
+      navigate("/inventory", {
+        state: {itemSaved: true}
+      });
     } catch (err) {
       setSaveError("Something went wrong saving your item. Please try again.");
       setSaving(false);
@@ -154,8 +157,11 @@ export default function Review() {
         )}
 
         {scanFailed && (
-          <div className="review-warning"> 
-            AI scan didn't complete. No problem — just fill in the details below manually.
+          <div className="review-warning flex items-start gap-2"> 
+            <ExclamationCircleIcon className = "w-6 h-6 shrink-0"/>
+              <span>
+                AI scan didn't complete. No problem — just fill in the details below manually.
+              </span>
           </div>
         )}
 
@@ -219,7 +225,8 @@ export default function Review() {
         </div>
 
         {saveError && (
-          <div className="review-warning">
+          <div className="review-warning flex items-start gap-2">
+            <ExclamationCircleIcon className = "w-6 h-6 shrink-0"/>
             {saveError}
           </div>
         )}
