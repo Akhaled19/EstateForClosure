@@ -4,7 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.postgres import get_db
 from app.models.item_interest import ItemInterest
 from app.schemas.item_interest_schema import (ItemInterestCreate, ItemInterestResponse)
+from app.core.deps import get_current_user
 from app.models.FamilyFriendUsers import FamilyFriendUsers
+from app.models.item import Item
 
 router = APIRouter(prefix="/item-interest", tags=["item-interest"])
 
@@ -60,8 +62,18 @@ async def check_interest(
 
 async def get_item_interests(
     item_id: str,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
+    
+    item_result = await db.execute(select(Item).where(Item.id == item_id))
+    item = item_result.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(404, "Item not found")
+    
+    if str(item.user_id) != str(current_user.id):
+        raise HTTPException(403, "Not your item")
+
 
     result = await db.execute(
         select(ItemInterest, FamilyFriendUsers.name, FamilyFriendUsers.phone)
