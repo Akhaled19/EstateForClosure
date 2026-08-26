@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.deps import get_current_user
 from app.db.postgres import get_db
 from app.models.FamilyFriendUsers import FamilyFriendUsers
+from app.models.family_friend_owner_link import FamilyFriendOwnerLink
 from app.models.profile import Profile
 from app.schemas.FamilyFriendUsers_schema import (FamilyFriendUserCreate, FamilyFriendUserResponse, ShareLinkResponse)
 
@@ -24,13 +25,31 @@ async def create_family_friend_user(
     if owner is None:
         raise HTTPException(401, "Invalid share link")
     
-    new_user = FamilyFriendUsers(name=user.name, phone=user.phone, owner_id = owner.id)
+    result = await db.execute(select(FamilyFriendUsers).where(FamilyFriendUsers.phone == user.phone))
+    visitor = result.scalar_one_or_none()
 
-    db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)
+    if visitor is None:
+        visitor = FamilyFriendUsers(name=user.name, phone=user.phone)
+        db.add(visitor)
+        await db.commit()
+        await db.refresh(visitor)
     
-    return new_user
+
+    result = await db.execute(
+        select(FamilyFriendOwnerLink).where(
+            FamilyFriendOwnerLink.family_friend_user_id == visitor.id,
+            FamilyFriendOwnerLink.owner_id == owner.id,
+        )
+    )
+
+    link = result.scalar_one_or_none()
+
+    if link is None:
+        link = FamilyFriendOwnerLink(family_friend_user_id= visitor.id, owner_id = owner.id)
+        db.add(link)
+        await db.commit()
+        
+    return visitor
 
 @router.get("/share-link", response_model=ShareLinkResponse)
 async def get_share_link(
