@@ -6,7 +6,7 @@ export async function forgotPassword(email: string) {
     redirectTo: `${window.location.origin}/reset-password`,
   });
     if (error) throw new Error(error.message);
-  return data;
+
 }
 
 
