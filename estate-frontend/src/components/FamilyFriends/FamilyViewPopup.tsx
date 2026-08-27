@@ -57,7 +57,7 @@ export default function FamilyViewPopup({ itemTitle, itemImage, date, status, pe
                 </p>
               ) : people.length === 0 ? (
                 <p className = "text-gray-500">
-                  Nobody expressed interested in this item.
+                  Nobody expressed interest in this item.
                 </p>
               ) : (
                 <div className = "border border-gray-200 rounded-lg max-h-[250px] overflow-y-auto"> 
