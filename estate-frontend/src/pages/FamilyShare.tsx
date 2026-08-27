@@ -47,15 +47,15 @@ const mockItems = [
 
 export default function FamilyShare() {
 
-  const { ownerID } = useParams();
-  const [enteredInfo, setEnteredInfo] = useState(() => localStorage.getItem("family_friend_user_id") !== null);
+  const { ownerID: shareToken} = useParams();
+  const [enteredInfo, setEnteredInfo] = useState(false)
 
   return (
     <div className = "h-[calc(100vh-70px)] bg-gray-100">
 
       {!enteredInfo ? (
         <div className = "h-full flex justify-center items-center"> 
-          <FamilyInfoPrompt onComplete={() => setEnteredInfo(true)}/>
+          <FamilyInfoPrompt onComplete={() => setEnteredInfo(true)} shareToken={shareToken ?? ""}/>
         </div>
       ) : (
         
@@ -68,7 +68,7 @@ export default function FamilyShare() {
             </h1>
 
             <p className = "mb-6 mt-3">
-              Owner's ID: {ownerID}
+              Owner's ID: {shareToken}
             </p>
 
             <div className = "bg-white rounded-xl shadow-lg p-10 min-h-[calc(100vh-170px)]">

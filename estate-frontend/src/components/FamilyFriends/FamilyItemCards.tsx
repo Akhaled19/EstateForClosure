@@ -12,6 +12,8 @@ type Prop = {
   item: FamilyItem;
 };
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
 export default function FamilyItemCards({ item }: Prop) {
   const [interested, setInterested] = useState(false);
   const [submittingInterest, setSubmittingInterest] = useState(false);
@@ -26,7 +28,7 @@ export default function FamilyItemCards({ item }: Prop) {
       }
 
       try {
-        const response = await fetch(`http://localhost:8000/item-interest/${item.id}/check/${familyfriendUserID}`);
+        const response = await fetch(`${API_BASE}/item-interest/${item.id}/check/${familyfriendUserID}`);
 
         if (!response.ok) {
           throw new Error("Error getting interests.");
@@ -56,7 +58,7 @@ export default function FamilyItemCards({ item }: Prop) {
 
     try {
       if (interested) {
-      const response = await fetch(`http://localhost:8000/item-interest/${item.id}`, 
+      const response = await fetch(`${API_BASE}/item-interest/${item.id}`, 
         {
           method: "DELETE",
           headers: {
@@ -74,7 +76,7 @@ export default function FamilyItemCards({ item }: Prop) {
       setInterested(false);
 
     } else {
-        const response = await fetch(`http://localhost:8000/item-interest/${item.id}`,
+        const response = await fetch(`${API_BASE}/item-interest/${item.id}`,
           {
             method: "POST",
             headers: {

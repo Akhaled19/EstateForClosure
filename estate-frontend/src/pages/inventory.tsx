@@ -21,7 +21,7 @@ export default function Inventory() {
   useEffect(() => {
     getShareLink()
       .then(({share_token}) => {
-        setShareUrl(`${window.location.origin}/esateItemsF&F/${share_token}`);
+        setShareUrl(`${window.location.origin}/estateItemsF&F/${share_token}`);
       })
       .catch(() => {
         setShareLinkError(true);
@@ -47,7 +47,7 @@ export default function Inventory() {
     setShareLinkError(false);
     getShareLink()
       .then(({share_token}) => {
-        setShareUrl(`${window.location.origin}/esateItemsF&F/${share_token}`);
+        setShareUrl(`${window.location.origin}/estateItemsF&F/${share_token}`);
       })
       .catch(() => {
         setShareLinkError(true);
