@@ -4,10 +4,13 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
 type Prop = {
   onComplete: () => void;
+  shareToken: string;
 };
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-export default function FamilyInfoPrompt({onComplete}: Prop) {
+
+export default function FamilyInfoPrompt({onComplete, shareToken}: Prop) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
@@ -30,13 +33,13 @@ export default function FamilyInfoPrompt({onComplete}: Prop) {
     setSubmittingInfo(true);
 
     try {
-      const response = await fetch("http://localhost:8000/family-friend-users/", 
+      const response = await fetch(`${API_BASE}/family-friend-users/`, 
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name: name.trim(), phone: phone.trim() }),
+          body: JSON.stringify({ name: name.trim(), phone: phone.trim(), share_token:shareToken }),
         }
       );
 
@@ -66,11 +69,9 @@ export default function FamilyInfoPrompt({onComplete}: Prop) {
           Family & Friends
         </h1>
 
-
         <p className = "mt-3 text-[#D4621A]">
           Please enter your information
         </p>
-
 
         <div className = "mt-6">
 
@@ -86,8 +87,6 @@ export default function FamilyInfoPrompt({onComplete}: Prop) {
           />
 
         </div>
-
-
         <div className = "mt-4">
 
           <label className = "block text-sm font-bold mb-1 text-[#1b2a4a]">
@@ -101,7 +100,6 @@ export default function FamilyInfoPrompt({onComplete}: Prop) {
             value = {phone}
             onChange={(e) => setPhone(e.target.value)}
           />
-
         </div>
 
         { error && (
@@ -115,21 +113,15 @@ export default function FamilyInfoPrompt({onComplete}: Prop) {
           </div>
         )}
 
-        
-
-
         <button
           onClick = {validateAndSubmit}
           disabled = {submittingInfo}
           className = "mt-6 w-full bg-[#d4621a] text-white py-2 rounded-xl hover:opacity-90"
         >
           {submittingInfo ? "Submitting..." : "Continue"}
-
         </button>
 
-
       </div>
-
     </div>
   );
 }
