@@ -1,7 +1,7 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getShareLink } from "../services/family";
 import InvenTable from "../components/Inventory/InvenTable";
-
 import ShareLinkCopied from "../components/Share/ShareLinkCopied"
 import ShareListButton from "../components/Share/ShareListButton"
 import SharePopup from "../components/Share/SharePopup"
@@ -10,37 +10,25 @@ import { useState, useRef, useEffect } from "react";
 
 
 export default function Inventory() {
-  const location = useLocation();
-  const navigate = useNavigate();
-
   const [showSavedToast, setShowSavedToast] = useState(false);
   const [showSharePopup, setShowSharePopup] = useState(false);
-
-  const ownerID = "1";
-  const shareUrl = `${window.location.origin}/estateItemsF&F/${ownerID}`;
-
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareLinkError, setShareLinkError] = useState(false);
   const [showCopiedPopup, setShowCopiedPopup] = useState(false);
   const copyTimeout = useRef<number | null>(null);
   
 
   useEffect(() => {
-    if (location.state?.itemSaved !== true) {
-      return;
-    }
-
-    setShowSavedToast(true);
-
-    const timer = window.setTimeout(() => {
-      setShowSavedToast(false);
-
-      navigate("/inventory", {
-        replace: true,
-        state: null,
+    getShareLink()
+      .then(({share_token}) => {
+        setShareUrl(`${window.location.origin}/estateItemsF&F/${share_token}`);
+      })
+      .catch(() => {
+        setShareLinkError(true);
       });
-    }, 4500);
+   
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [location.state?.itemSaved, navigate]);
 
   function copyShareLink() {
     navigator.clipboard.writeText(shareUrl);
@@ -54,6 +42,21 @@ export default function Inventory() {
       setShowCopiedPopup(false);
     }, 4500);
   }
+
+  function loadShareLink() {
+    setShareLinkError(false);
+    getShareLink()
+      .then(({share_token}) => {
+        setShareUrl(`${window.location.origin}/estateItemsF&F/${share_token}`);
+      })
+      .catch(() => {
+        setShareLinkError(true);
+      });
+  }
+
+  useEffect(() => {
+    loadShareLink();
+  }, []);
 
 
   return (
@@ -99,6 +102,7 @@ export default function Inventory() {
       <SharePopup 
         show = {showSharePopup} 
         shareUrl={shareUrl} 
+        shareLinkError={shareLinkError}
         onClose={() => {
           setShowSharePopup(false)
           setShowCopiedPopup(false);
@@ -108,6 +112,7 @@ export default function Inventory() {
           }
         }}
         onCopy={copyShareLink} 
+        onRetry={loadShareLink}
         />
 
     </div>
