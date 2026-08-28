@@ -21,6 +21,10 @@ from app.services.ebay_service import (
     publish_offer,
     find_categories,
     get_existing_offer,
+    exchange_ebay_code,
+    refresh_ebay_access_token,
+    delete_offer,
+    
 )
 
 logger = logging.getLogger(__name__)
@@ -36,6 +40,17 @@ async def ebay_auth():
 
     return RedirectResponse(url=authorization_url)
 
+
+@router.get("/auth/callback")
+async def ebay_auth_callback(code: str):
+
+    token_data = await exchange_ebay_code(code)
+    print("REFRESH TOKEN:", token_data["refresh_token"])
+
+
+    return {
+        "message": "eBay authorization successful"
+    }
 
 # creates eBay listing of a item from our db
 @router.post("/list/{item_id}")
@@ -128,30 +143,32 @@ async def list_item(
 @router.post("/test-inventory")
 async def test_inventory():
     return await create_inventory_item(
-        item_id="test-001",
-        title="test chair",
-        description="test chair - description",
+        item_id="estate-9",
+        title="test chair 9",
+        description="test chair 9 - description",
+        brand="Unbranded",
+        condition="NEW",
     )
 
 # creating offer for an item
 @router.post("/test-offer")
 async def test_offer():
-    return await create_offer()
+    return await create_offer(item_id="estate-9", price=35)
 
 # publish an offer as a actual listing
 @router.post("/test-publish")
 async def test_publish():
-    return await publish_offer("11461024010")
+    return await publish_offer("11488375010")
 
 # ebay specifically requires a inventory location
-@router.post("/test-location")
+@router.put("/test-location")
 async def test_location():
     return await create_inventory_location()
 
 # get details of an posted offer
 @router.get("/test-offer-details")
 async def test_offer_details():
-    return await get_offer("11461024010")
+    return await get_offer("11488375010")
 
 # update offer
 @router.put("/test-update-offer")
@@ -162,3 +179,21 @@ async def test_update_offer():
 @router.get("/test-find-categories")
 async def test_find_categories():
     return await find_categories("Chair")
+
+
+@router.get("/test-refresh")
+async def test_refresh():
+    access_token = await refresh_ebay_access_token()
+
+    return {
+        "message": "Token refresh successful",
+        "access_token_received": bool(access_token)
+    }
+
+@router.get("/test-existing-offer/{item_id}")
+async def test_existing_offer(item_id: str):
+    return await get_existing_offer(item_id)
+
+@router.delete("/test-delete-offer/{offer_id}")
+async def test_delete_offer(offer_id: str):
+    return await delete_offer(offer_id)

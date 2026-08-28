@@ -1,5 +1,7 @@
 import logging
 import httpx
+import base64
+
 
 from app.core.config import settings
 
@@ -19,6 +21,77 @@ def ebay_auth_url() -> str:
     )
 
 
+async def exchange_ebay_code(code: str):
+    url = "https://api.sandbox.ebay.com/identity/v1/oauth2/token"
+
+    credentials = f"{settings.EBAY_APP_ID}:{settings.EBAY_CERT_ID}"
+
+    encoded_credentials = base64.b64encode(
+        credentials.encode()
+    ).decode()
+
+    headers = {
+        "Authorization": f"Basic {encoded_credentials}",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    data = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": settings.EBAY_RU_NAME,
+    }
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.post(
+            url,
+            headers=headers,
+            data=data,
+        )
+
+    if response.status_code != 200:
+        raise Exception(
+            f"Failed to get eBay tokens: {response.text}"
+        )
+
+    return response.json()
+
+
+async def refresh_ebay_access_token():
+    url = "https://api.sandbox.ebay.com/identity/v1/oauth2/token"
+
+    credentials = f"{settings.EBAY_APP_ID}:{settings.EBAY_CERT_ID}"
+    encoded_credentials = base64.b64encode(
+        credentials.encode()
+    ).decode()
+
+    headers = {
+        "Authorization": f"Basic {encoded_credentials}",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    data = {
+        "grant_type": "refresh_token",
+        "refresh_token": settings.EBAY_REFRESH_TOKEN,
+        "scope": EBAY_SCOPE,
+    }
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.post(
+            url,
+            headers=headers,
+            data=data,
+        )
+
+    if response.status_code != 200:
+        raise Exception(
+            f"Failed to refresh eBay access token: {response.text}"
+        )
+
+    token_data = response.json()
+
+    return token_data["access_token"]
+
+
 
 async def create_inventory_item(
         item_id: str, 
@@ -28,10 +101,12 @@ async def create_inventory_item(
         condition: str | None,
     ):
 
+    access_token = await refresh_ebay_access_token()
+
     url = f"{EBAY_API_URL}/sell/inventory/v1/inventory_item/{item_id}"
 
     headers = {
-        "Authorization": f"Bearer {settings.EBAY_USER_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Content-Language": "en-US",
     }
@@ -40,6 +115,9 @@ async def create_inventory_item(
         "product": {
             "title": title,
             "description": description,
+            "imageUrls": [
+                "https://fvkypuuhumnjzaevsxxk.supabase.co/storage/v1/object/sign/test/chair-image.jpg?token=eyJraWQiOiJkMjM2MGMyMy1iMmRmLTRjMzUtYmViZi1hMjVlNGI1ODYwYTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ0ZXN0L2NoYWlyLWltYWdlLmpwZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3ODc5MzExOTMsImV4cCI6MTgxOTQ2NzE5M30.QiyzktIOthWbAt7RYND8eZZR0FsBgzYS8fIVDbIofS4"
+            ],
             "aspects": {
                 "Item Length": ["30 in"],
                 "Item Height": ["31 in"],
@@ -47,13 +125,16 @@ async def create_inventory_item(
                 "Item Width": ["32 in"],
                 "Brand" : [brand or "Unbranded"],
                 "Color" : ["Brown"]
-
             }
         },
         "condition": "USED_EXCELLENT",
         "availability": {
             "shipToLocationAvailability": {
-                "quantity": 1
+                "quantity": 1,
+                "merchantLocationKey": "test-location",
+                "allocationByFormat": {
+                    "fixedPrice": 1
+                }
             }
         }
     }
@@ -69,10 +150,12 @@ async def create_inventory_item(
 
 async def create_inventory_location():
     location_key = "test-location"
+    access_token = await refresh_ebay_access_token()
+
     url = f"{EBAY_API_URL}/sell/inventory/v1/location/{location_key}"
 
     headers = {
-        "Authorization": f"Bearer {settings.EBAY_USER_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Content-Language": "en-US",
     }
@@ -84,7 +167,8 @@ async def create_inventory_location():
                 "country": "US"
             }
         },
-        "name": "Test Location"
+        "name": "Test Location",
+        "merchantLocationStatus": "ENABLED"
     }
 
 
@@ -98,10 +182,11 @@ async def create_inventory_location():
 
 
 async def create_offer(item_id: str, price: float, category_id: str = "54235" ):
+    access_token = await refresh_ebay_access_token()
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer"
-
+    
     headers = {
-        "Authorization": f"Bearer {settings.EBAY_USER_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Content-Language": "en-US",
     }
@@ -134,10 +219,11 @@ async def create_offer(item_id: str, price: float, category_id: str = "54235" ):
 
 
 async def get_existing_offer(item_id: str):
+    access_token = await refresh_ebay_access_token()
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer"
 
     headers = {
-        "Authorization": f"Bearer {settings.EBAY_USER_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Content-Language": "en-US",
     }
@@ -151,16 +237,17 @@ async def get_existing_offer(item_id: str):
 
 
 async def publish_offer(offer_id: str):
+    access_token = await refresh_ebay_access_token()
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer/{offer_id}/publish"
 
     headers = {
-        "Authorization": f"Bearer {settings.EBAY_USER_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Content-Language": "en-US",
     }
 
     async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.post(url, headers=headers)
+        response = await client.post(url, headers=headers, json={})
 
 
 
@@ -168,10 +255,11 @@ async def publish_offer(offer_id: str):
 
 
 async def get_offer(offer_id: str):
+    access_token = await refresh_ebay_access_token()
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer/{offer_id}"
 
     headers = {
-        "Authorization": f"Bearer {settings.EBAY_USER_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Content-Language": "en-US",
     }
@@ -182,18 +270,19 @@ async def get_offer(offer_id: str):
     return response.status_code, response.text
 
 async def update_offer():
-    offer_id = "11461024010"
+    access_token = await refresh_ebay_access_token()
+    offer_id = "11488317010"
 
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer/{offer_id}"
 
     headers = {
-        "Authorization": f"Bearer {settings.EBAY_USER_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Content-Language": "en-US",
     }
 
     data = {
-        "sku": "test-001",
+        "sku": "4",
         "marketplaceId": "EBAY_US",
         "format": "FIXED_PRICE",
         "availableQuantity": 1,
@@ -202,7 +291,7 @@ async def update_offer():
         "listingDuration": "GTC",
         "pricingSummary": {
             "price": {
-                "value": "10.00",
+                "value": "25.00",
                 "currency": "USD"
             }
         },
@@ -222,10 +311,11 @@ async def update_offer():
 
 # temp to find valid ebay categories...
 async def find_categories(search_term: str):
+    access_token = await refresh_ebay_access_token()
     url = f"{EBAY_API_URL}/commerce/taxonomy/v1/category_tree/0"
 
     headers = {
-        "Authorization": f"Bearer {settings.EBAY_USER_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
 
@@ -253,3 +343,23 @@ async def find_categories(search_term: str):
 
     search(tree.get("rootCategoryNode", {}))
     return 200, matches
+
+
+
+async def delete_offer(offer_id: str):
+    access_token = await refresh_ebay_access_token()
+
+    url = f"{EBAY_API_URL}/sell/inventory/v1/offer/{offer_id}"
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Language": "en-US",
+    }
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.delete(
+            url,
+            headers=headers
+        )
+
+    return response.status_code, response.text

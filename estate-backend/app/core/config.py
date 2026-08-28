@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     EBAY_RU_NAME: str
     EBAY_ENVIRONMENT: str
     EBAY_USER_TOKEN: str
+    EBAY_REFRESH_TOKEN: str
 
     class Config:
         env_file = ".env"
