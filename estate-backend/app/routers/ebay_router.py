@@ -181,15 +181,6 @@ async def test_find_categories():
     return await find_categories("Chair")
 
 
-@router.get("/test-refresh")
-async def test_refresh():
-    access_token = await refresh_ebay_access_token()
-
-    return {
-        "message": "Token refresh successful",
-        "access_token_received": bool(access_token)
-    }
-
 @router.get("/test-existing-offer/{item_id}")
 async def test_existing_offer(item_id: str):
     return await get_existing_offer(item_id)
