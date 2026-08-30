@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.postgres import get_db
@@ -115,3 +115,17 @@ async def delete_interest(
     await db.commit()
 
     return {"message": "Interest removed"}
+
+#return interest count 
+@router.get("/{item_id}/count")
+async def get_interest_count(
+    item_id : str,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(func.count()).select_from(ItemInterest).where(ItemInterest.item_id == item_id)
+    )
+    
+    count = result.scalar_one()
+
+    return {"interest_count": count}

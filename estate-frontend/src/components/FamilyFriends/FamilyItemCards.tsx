@@ -17,6 +17,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export default function FamilyItemCards({ item }: Prop) {
   const [interested, setInterested] = useState(false);
   const [submittingInterest, setSubmittingInterest] = useState(false);
+  const [interestCount, setInterestCount] = useState(item.interest_count);
   console.log("FamilyItemCards render:", item.id, interested);
 
   useEffect(() => {
@@ -46,6 +47,18 @@ export default function FamilyItemCards({ item }: Prop) {
     
   }, [item.id]);
 
+  async function refreshCount() {
+    try {
+      const res = await fetch(`${API_BASE}/item-interest/${item.id}/count`);
+      if (res.ok) {
+        const { interest_count } = await res.json();
+        setInterestCount(interest_count);
+      }
+    } catch (err) {
+      // silently ignore - count staying stale for a moment isn't critical
+    }
+  }
+  
   async function handleExpressInterest() {
     const familyfriendUserID = localStorage.getItem("family_friend_user_id");
 
@@ -72,7 +85,6 @@ export default function FamilyItemCards({ item }: Prop) {
         throw new Error("Error removing interest.");
       }
 
-
       setInterested(false);
 
     } else {
@@ -89,10 +101,9 @@ export default function FamilyItemCards({ item }: Prop) {
         if (!response.ok) {
           throw new Error("Error expressing interest.");
         } 
-
         setInterested(true);
       }
-      
+    await refreshCount();  
     } catch (error) {
       console.error(error);
     } finally {
@@ -117,14 +128,12 @@ export default function FamilyItemCards({ item }: Prop) {
         
       </div>
 
-
-
       <h3 className = "family-card-title"> 
         {item.title}
       </h3>
 
       <p className = "family-card-interested"> 
-        {item.interest_count} interested
+        {interestCount} interested
       </p>
 
       <button 

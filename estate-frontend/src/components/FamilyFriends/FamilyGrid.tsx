@@ -22,5 +22,4 @@ export default function FamilyGrid({ items }: Prop) {
     </div>
   )
 
-
 }

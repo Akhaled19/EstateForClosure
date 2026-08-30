@@ -5,45 +5,6 @@ import FamilyGrid from "../components/FamilyFriends/FamilyGrid";
 import { getSharedItems, type SharedItem } from "../services/family";
 
 
-const mockItems = [
-  {
-    id: "1",
-    title: "Couch",
-    image_url: "/temp-couch.avif",
-    interest_count: 3,
-    status: "Unclaimed!"
-  },
-  {
-    id: "2",
-    title: "Mattress",
-    image_url: "",
-    interest_count: 0,
-    status: "Claimed!"
-  },
-  {
-    id: "3",
-    title: "Wooden chair",
-    image_url: "",
-    interest_count: 3,
-    status: "Unclaimed!"
-  },
-  {
-    id: "4",
-    title: "Table",
-    image_url: "",
-    interest_count: 0,
-    status: "Unclaimed!"
-  },
-  {
-    id: "5",
-    title: "Vase",
-    image_url: "",
-    interest_count: 1,
-    status: "Unclaimed!"
-  },
-];
-
-
 export default function FamilyShare() {
 
   const { ownerID: shareToken} = useParams();
@@ -62,6 +23,21 @@ export default function FamilyShare() {
       .finally(() => setLoading(false));
 
   }, [enteredInfo, shareToken]);
+
+
+  function loadItems() {
+    if(!shareToken) return;
+    setLoading(true);
+    getSharedItems(shareToken)
+      .then(setItems)
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    if(!enteredInfo) return;
+    loadItems();
+  }, [enteredInfo]);
 
   return (
     <div className = "h-[calc(100vh-70px)] bg-gray-100">
@@ -88,7 +64,7 @@ export default function FamilyShare() {
               ) : items.length === 0 ? (
                 <p>No items have been shared yet.</p>
               ) : (
-                <FamilyGrid items = {items}/> 
+                <FamilyGrid items = {items} /> 
               )}
             </div>
 
@@ -97,7 +73,7 @@ export default function FamilyShare() {
         </div>
 
       )}
-      
+
     </div>
   );
 }
