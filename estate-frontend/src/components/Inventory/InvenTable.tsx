@@ -86,6 +86,20 @@ export default function InvenTable() {
     );
   }
 
+  function updateItemStatus(id: string, status: Status) {
+    setInvenItems(prev =>
+      prev.map(item =>
+        item.id === id
+        ? {
+          ...item,
+          status: status
+        }
+        : item
+      )
+    )
+  }
+
+
   return (
     <div>
 
@@ -96,8 +110,8 @@ export default function InvenTable() {
         setStatus={setStatus}
       />
 
-      <div className = "flex justify-center mt-6 overflow-visible"> 
-        <table className="w-[600px] bg-white shadow-lg rounded-xl table-fixed">
+      <div className = "md:flex md:justify-center mt-6 overflow-x-auto"> 
+        <table className="w-[600px] bg-white shadow-lg rounded-xl table-fixed shrink-0">
             <colgroup>
               <col className="w-[80px]" />  
               <col className = "w-[300px]" />  
@@ -132,7 +146,7 @@ export default function InvenTable() {
               </tr>
             ) : (
               filtered.map((item) => (
-                <InvenRows key={item.id} item={item} openDropdown = {openDropdown} setOpenDropdown={setOpenDropdown} toggleFamilyShare = {toggleFamilyShare} />
+                <InvenRows key={item.id} item={item} openDropdown = {openDropdown} setOpenDropdown={setOpenDropdown} toggleFamilyShare = {toggleFamilyShare} updateItemStatus={updateItemStatus} />
               ))
             )}
 

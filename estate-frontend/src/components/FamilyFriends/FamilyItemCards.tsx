@@ -17,7 +17,6 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export default function FamilyItemCards({ item }: Prop) {
   const [interested, setInterested] = useState(false);
   const [submittingInterest, setSubmittingInterest] = useState(false);
-  console.log("FamilyItemCards render:", item.id, interested);
 
   useEffect(() => {
     async function checkInterest() {

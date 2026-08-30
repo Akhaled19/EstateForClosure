@@ -1,26 +1,46 @@
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import type { Item, Status } from "./InvenTable"
 
 
 
-type Item = {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  date: string;
-  sharedWithFamily: boolean;
-};
 
 type Property = {
   item: Item;
   openDropdown: string | null;
   setOpenDropdown: (v: string | null) => void;
   toggleFamilyShare: (id: string) => void;
+  updateItemStatus: (id: string, status: Status) => void;
 };
 
-export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFamilyShare}: Property) {
-
+export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus}: Property) {
+  
   const showActions = (openDropdown === item.id);
+  const [listing, setListing] = useState(false);
+
+  async function createEbayListing(itemId: string) {
+    try {
+      setListing(true);
+
+      const response = await fetch(`http://localhost:8000/ebay/list/${itemId}`, {method: "POST"});
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to create eBay listing");
+      }
+      console.log("eBay listing created:", data);
+      updateItemStatus(itemId, "Listed");
+      return data;
+    } catch (error) {
+      console.error("eBay listing failed:", error);
+      return null;
+    } finally {
+      setListing(false);
+    }
+  }
+
+
   
   return (
     <>
@@ -53,8 +73,19 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
                   {item.sharedWithFamily ? "Unshare from F&F" : "Share to F&F"}
                 </button>
 
-                <button className = "actions-buttons">
-                  Create eBay Listing
+                <button 
+                  className = "actions-buttons"
+                  onClick = {async () => { 
+                    const data = await createEbayListing(item.id);
+                    setOpenDropdown(null);
+
+                    if (data) {
+                      console.log("Listing ID:", data.ebay_listing_id);
+                    }
+                  }}
+                  disabled = {listing}
+                >
+                  { listing ? "Creating listing..." : "Create eBay Listing" }
                 </button>
 
                 <button className = "actions-buttons">
