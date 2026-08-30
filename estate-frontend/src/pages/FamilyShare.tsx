@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import FamilyInfoPrompt from "../components/FamilyFriends/FamilyInfoPrompt";
 import FamilyGrid from "../components/FamilyFriends/FamilyGrid";
+import { getSharedItems, type SharedItem } from "../services/family";
 
 
 const mockItems = [
@@ -43,12 +44,24 @@ const mockItems = [
 ];
 
 
-
-
 export default function FamilyShare() {
 
   const { ownerID: shareToken} = useParams();
   const [enteredInfo, setEnteredInfo] = useState(false)
+  const [items, setItems] = useState<SharedItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!enteredInfo || !shareToken) return;
+
+    setLoading(true);
+    getSharedItems(shareToken)
+      .then(setItems)
+      .catch(() => setLoading(true))
+      .finally(() => setLoading(false));
+
+  }, [enteredInfo, shareToken]);
 
   return (
     <div className = "h-[calc(100vh-70px)] bg-gray-100">
@@ -67,20 +80,24 @@ export default function FamilyShare() {
               Family & Friends Item List
             </h1>
 
-            <p className = "mb-6 mt-3">
-              Owner's ID: {shareToken}
-            </p>
-
-            <div className = "bg-white rounded-xl shadow-lg p-10 min-h-[calc(100vh-170px)]">
-              <FamilyGrid items={mockItems} />
+            <div className="bg-white rounded-xl shadow-lg p-10 min-h-[calc(100vh-170px)]">
+              {loading ? (
+                <p> Loading items...</p>
+              ) : error ? (
+                <p className="text-red-500">Couldn't load items. Please refresh and try again.</p>
+              ) : items.length === 0 ? (
+                <p>No items have been shared yet.</p>
+              ) : (
+                <FamilyGrid items = {items}/> 
+              )}
             </div>
 
           </div>
 
         </div>
-        
-      )}
 
+      )}
+      
     </div>
   );
 }

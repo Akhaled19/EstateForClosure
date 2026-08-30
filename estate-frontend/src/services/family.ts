@@ -21,3 +21,21 @@ export async function getShareLink(): Promise<ShareLinkResponse> {
     }
     return res.json();
 }
+
+export type SharedItem = {
+    id: string;
+    title: string; 
+    image_url: string;
+    interest_count: number;
+    status: string;
+};
+
+export async function getSharedItems(shareToken: string): Promise<SharedItem[]> {
+    const res = await fetch(`${API_BASE}/items/shared/${shareToken}`);
+
+    if(!res.ok) {
+        throw new Error(`Failed to load shared items: ${res.status}`)
+    }
+
+    return res.json();
+}
