@@ -30,6 +30,7 @@ class ItemDetailResponse(BaseModel):
     is_finalized: bool
     status: str
     image_url: str
+    shared_with_family: bool = False
 
     title: Optional[str] = None
     description: Optional[str] = None 
@@ -38,7 +39,7 @@ class ItemDetailResponse(BaseModel):
     brand: Optional[str] = None 
     dimensions: Optional[str] = None 
     asking_price: Optional[float] = None 
-
+    
     ai_status: Optional[str] = None
     ai_title_suggestion: Optional[str] = None
     ai_description_draft: Optional[str] = None
@@ -59,3 +60,14 @@ class ItemFinalizeRequest(BaseModel):
     brand: Optional[str] = None 
     dimensions: Optional[str] = None 
     price: float 
+
+class ItemShareRequest(BaseModel):
+    shared_with_family : bool
+
+
+class SharedItemResponse(BaseModel):
+    id: str
+    title: str
+    image_url: str 
+    interest_count: int
+    status: str #Claimed | Unclaimed
