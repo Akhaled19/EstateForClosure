@@ -39,3 +39,14 @@ export async function getSharedItems(shareToken: string): Promise<SharedItem[]> 
 
     return res.json();
 }
+
+export async function claimInterest(itemId: string, familyFriendUserId: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/item-interest/${itemId}/claim/${familyFriendUserId}`, {
+        method: "PATCH",
+        headers: await authHeaders(),   
+    });
+
+    if(!res.ok){
+        throw new Error(`Failed to claim interest: ${res.status}`);
+    }
+}

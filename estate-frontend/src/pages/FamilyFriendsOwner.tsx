@@ -1,6 +1,7 @@
 import { useState } from "react";
 import FamilyOwnerTable from "../components/FamilyFriends/FamilyOwnerTable";
 import FamilyViewPopup from "../components/FamilyFriends/FamilyViewPopup";
+import { claimInterest } from "../services/family";
 
 type InterestedPerson = {
   id: string;
@@ -82,8 +83,23 @@ export default function FamilyFriends() {
       } finally {
         setLoadingPeople(false);
       }
-    
+  }
 
+  async function handleClaim(familyFriendUserId: string){
+    if(!selectedItem) return;
+    
+    const confirmed = window.confirm(
+      "Are you sure you want to give this item to this person? Everyone else who expressed interest will be marked as not selected."
+    );
+
+    if(!confirmed) return;
+
+    try {
+      await claimInterest(selectedItem.id, familyFriendUserId);
+      await viewItem(selectedItem);  // refetch to show updated claimed/rejected states
+    } catch (err) {
+      alert("Couldn't claim this interest. Please try again.");
+    }
   }
 
   return (
@@ -115,6 +131,7 @@ export default function FamilyFriends() {
             setSelectedItem(null)
             setInterestedPeople([])
           }}
+          onClaim={handleClaim}
         />
       )}
 

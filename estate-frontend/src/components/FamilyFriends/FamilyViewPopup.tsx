@@ -3,6 +3,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 
 type InterestedPerson = {
     id: string;
+    family_friend_user_id: string;
     name: string;
     phone: string;
 };
@@ -15,9 +16,10 @@ type Prop = {
     people: InterestedPerson[];
     loading: boolean;
     onClose: () => void;
+    onClaim: (familyFriendUserId: string) => void 
 };
 
-export default function FamilyViewPopup({ itemTitle, itemImage, date, status, people, loading, onClose }: Prop) {
+export default function FamilyViewPopup({ itemTitle, itemImage, date, status, people, loading, onClose, onClaim }: Prop) {
 
   return (
     <div className = "fixed inset-0 bg-black/40 flex items-center justify-center z-50"> 
@@ -69,7 +71,9 @@ export default function FamilyViewPopup({ itemTitle, itemImage, date, status, pe
                           <p className = "text-[14px] text-[#1b2a4a] font-['Inter','system-ui','sans-serif'] "> Phone: {person.phone} </p>
                         </div> 
 
-                        <button className = "px-4 py-2 rounded-full bg-[#1b2a4a] text-white cursor-pointer">
+                        <button 
+                          className = "px-4 py-2 rounded-full bg-[#1b2a4a] text-white cursor-pointer" 
+                          onClick={() => onClaim(person.family_friend_user_id)}>
                           Claim
                         </button>
 
