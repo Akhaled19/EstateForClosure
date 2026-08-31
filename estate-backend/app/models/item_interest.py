@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 class InterestStatus(str, enum.Enum):
     unclaimed = "unclaimed"
     claimed = "claimed"
+    rejected = "rejected"
 
 
 class ItemInterest(Base):
