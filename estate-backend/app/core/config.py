@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     EBAY_ENVIRONMENT: str
     EBAY_USER_TOKEN: str
     EBAY_REFRESH_TOKEN: str
+    EBAY_PAYMENT_POLICY_ID: str
+    EBAY_FULFILLMENT_POLICY_ID: str
+    EBAY_RETURN_POLICY_ID: str
 
     class Config:
         env_file = ".env"

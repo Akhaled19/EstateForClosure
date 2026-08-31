@@ -14,6 +14,11 @@ export type Item = {
   sharedWithFamily: boolean;
 };
 
+type Prop = {
+  onEbayListingSuccess: () => void;
+};
+
+
   const items: Item[] = [
     {
       id: "1",
@@ -60,7 +65,7 @@ export type Item = {
   ];
 
 
-export default function InvenTable() {
+export default function InvenTable({ onEbayListingSuccess }: Prop) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -146,7 +151,15 @@ export default function InvenTable() {
               </tr>
             ) : (
               filtered.map((item) => (
-                <InvenRows key={item.id} item={item} openDropdown = {openDropdown} setOpenDropdown={setOpenDropdown} toggleFamilyShare = {toggleFamilyShare} updateItemStatus={updateItemStatus} />
+                <InvenRows 
+                  key={item.id} 
+                  item={item} 
+                  openDropdown = {openDropdown} 
+                  setOpenDropdown={setOpenDropdown} 
+                  toggleFamilyShare = {toggleFamilyShare} 
+                  updateItemStatus={updateItemStatus} 
+                  onEbayListingSuccess={onEbayListingSuccess}
+                  />
               ))
             )}
 
