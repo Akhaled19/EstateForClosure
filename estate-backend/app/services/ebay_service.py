@@ -205,9 +205,9 @@ async def create_offer(item_id: str, price: float, category_id: str = "54235" ):
             }
         },
         "listingPolicies": {
-            "paymentPolicyId": "6245181000",
-            "fulfillmentPolicyId": "6245182000",
-            "returnPolicyId": "6245183000"
+            "paymentPolicyId": settings.EBAY_PAYMENT_POLICY_ID,
+            "fulfillmentPolicyId": settings.EBAY_FULFILLMENT_POLICY_ID,
+            "returnPolicyId": settings.EBAY_RETURN_POLICY_ID
         }
     }
 
@@ -296,9 +296,9 @@ async def update_offer():
             }
         },
         "listingPolicies": {
-            "paymentPolicyId": "6245181000",
-            "fulfillmentPolicyId": "6245182000",
-            "returnPolicyId": "6245183000"
+            "paymentPolicyId": settings.EBAY_PAYMENT_POLICY_ID,
+            "fulfillmentPolicyId": settings.EBAY_FULFILLMENT_POLICY_ID,
+            "returnPolicyId": settings.EBAY_RETURN_POLICY_ID
         }
     }
 

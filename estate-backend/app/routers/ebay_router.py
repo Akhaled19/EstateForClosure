@@ -22,7 +22,6 @@ from app.services.ebay_service import (
     find_categories,
     get_existing_offer,
     exchange_ebay_code,
-    refresh_ebay_access_token,
     delete_offer,
     
 )
@@ -45,12 +44,9 @@ async def ebay_auth():
 async def ebay_auth_callback(code: str):
 
     token_data = await exchange_ebay_code(code)
-    print("REFRESH TOKEN:", token_data["refresh_token"])
 
 
-    return {
-        "message": "eBay authorization successful"
-    }
+    return token_data
 
 # creates eBay listing of a item from our db
 @router.post("/list/{item_id}")
@@ -136,6 +132,59 @@ async def list_item(
 
     
     return { "message" : "Item successfully listed on eBay", "item_id" : item.id, "ebay_listing_id" : listing_id }
+
+# deletes ebay listing
+@router.delete("/list/{item_id}")
+async def cancel_listing(
+    item_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    result = await db.execute(select(Item).where(Item.id==item_id))
+    item = result.scalar_one_or_none()
+
+    if item is None:
+        raise HTTPException(404, "Item not found")
+
+    if str(item.user_id) != str(current_user.id): 
+        raise HTTPException(403, "You don't own this item")
+
+    if not item.ebay_listing_id:
+        raise HTTPException(400, "Item doesn't have an eBay listing")
+
+    status_code, response = await get_existing_offer(item.id)
+
+    if status_code != 200:
+        raise HTTPException(502, f"Failed to find existing eBay offer: {response}")
+
+    try: 
+        offer_data = json.loads(response)
+
+        if not offer_data.get("offers"):
+            raise HTTPException(404, "No eBay offer found for this item")
+        offer_id = offer_data["offers"][0]["offerId"]
+
+    except (json.JSONDecodeError, KeyError, IndexError):
+        raise HTTPException(502, f"Failed to read existing eBay offer: {response}")
+
+    status_code, response = await delete_offer(offer_id)
+
+    if status_code not in (200, 204):
+        raise HTTPException(502, f"Failed to cancel eBay Listing: {response}")
+
+    item.ebay_listing_id = None
+    item.status = ItemStatus.draft
+
+    await db.commit()
+    await db.refresh(item)
+
+    return {
+        "message" : "eBay listing successfully cancelled",
+        "item_id" : item.id,
+    }
+
+
 
 # TESTING:
 
