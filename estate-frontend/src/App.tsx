@@ -13,6 +13,8 @@ import FamilyFriends from "./pages/FamilyFriendsOwner.tsx";
 import Review from "./pages/review";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
+import LandingPage from "./pages/landing-page.tsx";
+import BrowsePage from "./pages/browse-page.tsx";
 
 
 function Layout() {
@@ -37,6 +39,10 @@ function Layout() {
           <Route path="/items/:id/review" element={<Review />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/landing-page" element={<LandingPage />} />
+          <Route path="/browse" element={<BrowsePage />} />
+
+
         </Routes>
       </div>
     </div>
