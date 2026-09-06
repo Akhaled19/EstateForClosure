@@ -1,16 +1,8 @@
-
-type mockItem = {
-  id: string;
-  title: string;
-  image_url: string;
-  date: string;
-  status: "Unclaimed" | "Claimed";
-  interest_count: number;
-};
+import type { OwnerItem } from "../../services/family";
 
 type Prop = {
-  items: mockItem[];
-  onView: (item: mockItem) => void;
+  items: OwnerItem[];
+  onView: (item: OwnerItem) => void;
 };
 
 export default function FamilyOwnerTable({ items, onView }: Prop) {

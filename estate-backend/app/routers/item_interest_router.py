@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -80,15 +80,6 @@ async def create_interest(
     db: AsyncSession = Depends(get_db)
 ):
 
-
-    item_result = await db.execute(select(Item).where(Item.id == item_id))
-    item = item_result.scalar_one_or_none()
-    if item is None:
-        raise HTTPException(404, "Item not found")
-
-    if item.title is None:
-        raise HTTPException(400, "This item is still being processed and isn't ready for interest yet.")
-
     new_interest = ItemInterest(item_id=item_id, family_friend_user_id=interest.family_friend_user_id)
 
     db.add(new_interest)
@@ -106,8 +97,6 @@ async def create_interest(
     result = await db.execute(select(FamilyFriendUsers).where(FamilyFriendUsers.id == interest.family_friend_user_id))
 
     family_friend_user = result.scalar_one()
-
-
 
     return {
         "id": new_interest.id,
@@ -191,3 +180,67 @@ async def delete_interest(
     await db.commit()
 
     return {"message": "Interest removed"}
+
+#return interest count 
+@router.get("/{item_id}/count")
+async def get_interest_count(
+    item_id : str,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(func.count()).select_from(ItemInterest).where(ItemInterest.item_id == item_id)
+    )
+    
+    count = result.scalar_one()
+
+    return {"interest_count": count}
+
+#owner claims the interested user/winner for the item 
+@router.patch("/{item_id}/claim/{family_friend_user_id}")
+async def claim_interest(
+    item_id: str,
+    family_friend_user_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    item_result = await db.execute(select(Item).where(Item.id == item_id))
+    item = item_result.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(404, "Item not found")
+    if str(item.user_id) != str(current_user.id):
+        raise HTTPException(403, "Not your item")
+
+    result = await db.execute(
+        select(ItemInterest).where(ItemInterest.item_id == item_id)
+    )
+    interests = result.scalars().all()
+
+    already_claimed = any(i.status == InterestStatus.claimed for i in interests)
+    if already_claimed:
+        raise HTTPException(409, "This item has already been claimed.")
+
+    target = None
+    for i in interests:
+        if str(i.family_friend_user_id) == family_friend_user_id:
+            target = i
+            break
+
+    if target is None:
+        raise HTTPException(404, "Interest not found")
+
+    for interest in interests:
+        interest.status = (
+            InterestStatus.claimed if interest.id == target.id
+            else InterestStatus.rejected
+        )
+
+    await db.commit()
+    await db.refresh(target)
+
+    return {
+        "id": target.id,
+        "item_id": target.item_id,
+        "family_friend_user_id": target.family_friend_user_id,
+        "status": target.status,
+        "created_at": target.created_at,
+    }

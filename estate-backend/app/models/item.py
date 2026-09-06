@@ -1,4 +1,4 @@
-from sqlalchemy import String, Float, DateTime, ForeignKey, func, Enum
+from sqlalchemy import String, Float, DateTime, ForeignKey, func, Enum, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.postgres import Base
@@ -40,3 +40,4 @@ class Item(Base):
     )
     brand: Mapped[str] = mapped_column(String, nullable=True)
     dimensions: Mapped[str] = mapped_column(String, nullable=True)
+    shared_with_family : Mapped[bool] = mapped_column(Boolean, default=False)

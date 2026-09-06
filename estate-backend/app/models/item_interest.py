@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 class InterestStatus(str, enum.Enum):
     unclaimed = "unclaimed"
     claimed = "claimed"
+    rejected = "rejected"
 
 
 class ItemInterest(Base):
@@ -21,4 +22,3 @@ class ItemInterest(Base):
     family_friend_user_id: Mapped[str] = mapped_column(String, ForeignKey("family_friend_users.id"), nullable=False)
     status: Mapped[InterestStatus] = mapped_column(Enum(InterestStatus), default=InterestStatus.unclaimed)
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())
-    shared_with_family = mapped_column(Boolean, default=False)
