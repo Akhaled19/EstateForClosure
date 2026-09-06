@@ -15,6 +15,11 @@ export type Item = {
   sharedWithFamily: boolean;
 };
 
+type Prop = {
+  onEbayListingSuccess: () => void;
+};
+
+
   const items: Item[] = [
     {
       id: "1",
@@ -61,7 +66,7 @@ export type Item = {
   ];
 
 
-export default function InvenTable() {
+export default function InvenTable({ onEbayListingSuccess }: Prop) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -89,6 +94,20 @@ export default function InvenTable() {
     }
   }
 
+  function updateItemStatus(id: string, status: Status) {
+    setInvenItems(prev =>
+      prev.map(item =>
+        item.id === id
+        ? {
+          ...item,
+          status: status
+        }
+        : item
+      )
+    )
+  }
+
+
   return (
     <div>
 
@@ -99,8 +118,8 @@ export default function InvenTable() {
         setStatus={setStatus}
       />
 
-      <div className = "flex justify-center mt-6 overflow-visible"> 
-        <table className="w-[600px] bg-white shadow-lg rounded-xl table-fixed">
+      <div className = "md:flex md:justify-center mt-6 overflow-x-auto"> 
+        <table className="w-[600px] bg-white shadow-lg rounded-xl table-fixed shrink-0">
             <colgroup>
               <col className="w-[80px]" />  
               <col className = "w-[300px]" />  
@@ -135,7 +154,15 @@ export default function InvenTable() {
               </tr>
             ) : (
               filtered.map((item) => (
-                <InvenRows key={item.id} item={item} openDropdown = {openDropdown} setOpenDropdown={setOpenDropdown} toggleFamilyShare = {toggleFamilyShare} />
+                <InvenRows 
+                  key={item.id} 
+                  item={item} 
+                  openDropdown = {openDropdown} 
+                  setOpenDropdown={setOpenDropdown} 
+                  toggleFamilyShare = {toggleFamilyShare} 
+                  updateItemStatus={updateItemStatus} 
+                  onEbayListingSuccess={onEbayListingSuccess}
+                  />
               ))
             )}
 

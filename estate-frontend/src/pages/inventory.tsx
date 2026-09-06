@@ -7,6 +7,7 @@ import ShareListButton from "../components/Share/ShareListButton"
 import SharePopup from "../components/Share/SharePopup"
 import ReviewToast from "../components/ReviewToast"
 import { useState, useRef, useEffect } from "react";
+import EbayListingToast from "../components/EbayListingToast" 
 
 
 export default function Inventory() {
@@ -16,6 +17,21 @@ export default function Inventory() {
   const [shareLinkError, setShareLinkError] = useState(false);
   const [showCopiedPopup, setShowCopiedPopup] = useState(false);
   const copyTimeout = useRef<number | null>(null);
+  const [showEbayToast, setShowEbayToast] = useState(false);
+  const ebayToastTimeout = useRef<number | null>(null);
+
+  function showEbayListingToast() {
+    setShowEbayToast(true);
+
+  
+    if (ebayToastTimeout.current) {
+      clearTimeout(ebayToastTimeout.current)
+    }
+
+    ebayToastTimeout.current = window.setTimeout(() => {
+      setShowEbayToast(false);
+    }, 4500);
+  }
   
 
   useEffect(() => {
@@ -96,9 +112,10 @@ export default function Inventory() {
 
       </div>
 
-      <InvenTable />
+      <InvenTable onEbayListingSuccess={showEbayListingToast} />
 
       <ReviewToast show = {showSavedToast} />
+      <EbayListingToast show = {showEbayToast} />
       <SharePopup 
         show = {showSharePopup} 
         shareUrl={shareUrl} 

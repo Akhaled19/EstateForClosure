@@ -4,7 +4,7 @@ from app.db.postgres import engine, Base
 from app.routers import items
 from app.routers import item_interest_router
 from app.routers import FamilyFriendUsers_router
-
+from app.routers import ebay_router
 
 import app.models 
 
@@ -24,6 +24,7 @@ app.add_middleware(
 app.include_router(items.router)
 app.include_router(item_interest_router.router)
 app.include_router(FamilyFriendUsers_router.router)
+app.include_router(ebay_router.router)
 
 @app.on_event("startup")
 async def ensure_indexes():
