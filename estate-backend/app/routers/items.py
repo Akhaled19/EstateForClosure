@@ -10,7 +10,7 @@ from app.db.mongo import get_mongo
 from app.core.deps import get_current_user
 from app.models.item import Item, ItemStatus, ItemCondition
 from app.models.profile import Profile
-from app.schemas.item_scan_draft import ScanResponse, ItemDetailResponse, ItemFinalizeRequest, ItemShareRequest, SharedItemResponse
+from app.schemas.item_scan_draft import ScanResponse, ItemDetailResponse, ItemFinalizeRequest, ItemShareRequest, SharedItemResponse, OwnerSharedItemResponse
 from app.services.storage_service import upload_item_image
 from app.services import item_scan_draft_service as draft_service
 from app.services.get_owner_shared_items import get_owner_shared_items
@@ -63,26 +63,20 @@ async def scan_item(
     return ScanResponse(item_id=item.id, ai_status="processing", image_url=image_url)
 
 #fetch the items that are shared with family 
-@router.get("/family-view", response_model=list[ItemDetailResponse])
+@router.get("/family-view", response_model=list[OwnerSharedItemResponse])
 async def get_family_view( 
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
     enriched = await get_owner_shared_items(db, current_user.id)
     return [
-        ItemDetailResponse(
-            id=e["item"].id, 
-            is_finalized=True,
-            status=e["item"].status.value,
-            image_url=e["item"].image_url,
+        OwnerSharedItemResponse(
+            id=e["item"].id,
             title=e["item"].title,
-            description=e["item"].description,
-            category=e["item"].category,
-            condition=e["item"].condition.value if e["item"].condition else None,
-            brand=e["item"].brand,
-            dimensions=e["item"].dimensions,
-            asking_price=e["item"].asking_price,
-            shared_with_family=e["item"].shared_with_family,
+            image_url=e["item"].image_url,
+            date=e["item"].created_at.strftime("%m/%d/%Y"),
+            interest_count=e["interest_count"],
+            status=e["status"],
         )
         for e in enriched
     ]

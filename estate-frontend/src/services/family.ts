@@ -4,6 +4,24 @@ export type ShareLinkResponse = {
     share_token: String;
 };
 
+export type SharedItem = {
+    id: string;
+    title: string; 
+    image_url: string;
+    interest_count: number;
+    status: string;
+};
+
+export type OwnerItem = {
+    id: string;
+    title: string;
+    image_url: string;
+    date: string;
+    interest_count: number;
+    status: string;
+    // add other fields as needed
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 async function authHeaders(): Promise<HeadersInit> {
@@ -22,13 +40,6 @@ export async function getShareLink(): Promise<ShareLinkResponse> {
     return res.json();
 }
 
-export type SharedItem = {
-    id: string;
-    title: string; 
-    image_url: string;
-    interest_count: number;
-    status: string;
-};
 
 export async function getSharedItems(shareToken: string): Promise<SharedItem[]> {
     const res = await fetch(`${API_BASE}/items/shared/${shareToken}`);
@@ -37,6 +48,18 @@ export async function getSharedItems(shareToken: string): Promise<SharedItem[]> 
         throw new Error(`Failed to load shared items: ${res.status}`)
     }
 
+    return res.json();
+}
+
+
+export async function getFamilyView(): Promise<OwnerItem[]> {
+    const res = await fetch(`${API_BASE}/items/family-view`, {
+        headers: await authHeaders(),
+    });
+
+    if(!res.ok){
+        throw new Error(`Failed to load shared items: ${res.status}`);
+    }
     return res.json();
 }
 

@@ -71,3 +71,12 @@ class SharedItemResponse(BaseModel):
     image_url: str 
     interest_count: int
     status: str #Claimed | Unclaimed
+
+
+class OwnerSharedItemResponse(BaseModel):
+    id: str
+    title: str
+    image_url: str 
+    date: str
+    interest_count: int
+    status: str #Claimed | Unclaimed - claim status, not itemStatus 

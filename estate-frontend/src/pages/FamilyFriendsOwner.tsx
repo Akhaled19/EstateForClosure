@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getFamilyView, claimInterest, type OwnerItem } from "../services/family";
 import FamilyOwnerTable from "../components/FamilyFriends/FamilyOwnerTable";
 import FamilyViewPopup from "../components/FamilyFriends/FamilyViewPopup";
-import { claimInterest } from "../services/family";
+
 
 type InterestedPerson = {
   id: string;
@@ -13,76 +14,44 @@ type InterestedPerson = {
   created_at: string;
 }
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-
-const mockOwnerItems = [
-  {
-    id: "1",
-    title: "Couch",
-    image_url: "/temp-couch.avif",
-    date: "06/24/2026",
-    status: "Unclaimed" as const,
-    interest_count: 3,
-  },
-  {
-    id: "2",
-    title: "Mattress",
-    image_url: "",
-    date: "06/28/2026",
-    status: "Claimed" as const,
-    interest_count: 0,
-  },
-    {
-    id: "3",
-    title: "Wooden chair",
-    image_url: "",
-    date: "07/2/2026",
-    status: "Claimed" as const,
-    interest_count: 3,
-  },
-    {
-    id: "4",
-    title: "Table",
-    image_url: "",
-    date: "07/3/2026",
-    status: "Claimed" as const,
-    interest_count: 0,
-  },
-    {
-    id: "5",
-    title: "Vase",
-    image_url: "",
-    date: "07/5/2026",
-    status: "Claimed" as const,
-    interest_count: 1,
-  },
-];
 
 export default function FamilyFriends() {
-  const [selectedItem, setSelectedItem] = useState<typeof mockOwnerItems[0] | null>(null);
+  const [items, setItems] = useState<OwnerItem[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<OwnerItem | null>(null);
   const [interestedPeople, setInterestedPeople] = useState<InterestedPerson[]>([]);
   const [loadingPeople, setLoadingPeople] = useState(false);
 
-  async function viewItem( item: typeof mockOwnerItems[0]) {
+  useEffect(() => {
+    getFamilyView()
+      .then(setItems)
+      .catch((err) => console.log("Failed to load items", err))
+      .finally(() => setLoadingItems(false))
+  })
+
+  async function viewItem( item: OwnerItem) {
     setSelectedItem(item);
     setLoadingPeople(true);
 
     try {
-      const response = await fetch(`http://localhost:8000/item-interest/${item.id}`);
+      const response = await fetch(`${API_BASE}/item-interest/${item.id}`);
     
-
       if (!response.ok) {
         throw new Error("Failed to fetch interested people");
       }
 
       const people = await response.json();
       setInterestedPeople(people);
-      } catch (error) {
+
+    } catch (error) {
         console.error("Error fetching interested people:", error);
         setInterestedPeople([]);
-      } finally {
+
+    } finally {
         setLoadingPeople(false);
-      }
+    }
   }
 
   async function handleClaim(familyFriendUserId: string){
@@ -97,6 +66,7 @@ export default function FamilyFriends() {
     try {
       await claimInterest(selectedItem.id, familyFriendUserId);
       await viewItem(selectedItem);  // refetch to show updated claimed/rejected states
+
     } catch (err) {
       alert("Couldn't claim this interest. Please try again.");
     }
@@ -114,9 +84,12 @@ export default function FamilyFriends() {
          </p>
 
         <div className = "family-owner-view-container shadow-lg rounded-xl">
-          <FamilyOwnerTable items={mockOwnerItems} onView = {viewItem} />
+          {loadingItems ? (
+            <p>Loading items...</p>
+          ) : (
+            <FamilyOwnerTable items={items} onView={viewItem} />
+          )}
         </div>
-
       </div> 
 
       {selectedItem && (
@@ -124,7 +97,7 @@ export default function FamilyFriends() {
           itemTitle={selectedItem.title}
           itemImage={selectedItem.image_url}
           date={selectedItem.date}
-          status={selectedItem.status}
+          status={selectedItem.status as "Unclaimed" | "Claimed"}
           people={interestedPeople}
           loading={loadingPeople}
           onClose={() => {
