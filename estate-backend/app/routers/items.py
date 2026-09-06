@@ -9,11 +9,11 @@ from app.db.postgres import get_db
 from app.db.mongo import get_mongo
 from app.core.deps import get_current_user
 from app.models.item import Item, ItemStatus, ItemCondition
-from app.models.item_interest import ItemInterest, InterestStatus
 from app.models.profile import Profile
 from app.schemas.item_scan_draft import ScanResponse, ItemDetailResponse, ItemFinalizeRequest, ItemShareRequest, SharedItemResponse
 from app.services.storage_service import upload_item_image
-from app.services import item_scan_draft_service as draft_service 
+from app.services import item_scan_draft_service as draft_service
+from app.services.get_owner_shared_items import get_owner_shared_items
 from app.worker.actors import run_ai_scan
  
 
@@ -62,6 +62,30 @@ async def scan_item(
 
     return ScanResponse(item_id=item.id, ai_status="processing", image_url=image_url)
 
+#fetch the items that are shared with family 
+@router.get("/family-view", response_model=list[ItemDetailResponse])
+async def get_family_view( 
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    enriched = await get_owner_shared_items(db, current_user.id)
+    return [
+        ItemDetailResponse(
+            id=e["item"].id, 
+            is_finalized=True,
+            status=e["item"].status.value,
+            image_url=e["item"].image_url,
+            title=e["item"].title,
+            description=e["item"].description,
+            category=e["item"].category,
+            condition=e["item"].condition.value if e["item"].condition else None,
+            brand=e["item"].brand,
+            dimensions=e["item"].dimensions,
+            asking_price=e["item"].asking_price,
+            shared_with_family=e["item"].shared_with_family,
+        )
+        for e in enriched
+    ]
 
 #fetch the item row from Postgres by item_id
 @router.get("/{item_id}", response_model=ItemDetailResponse)
@@ -227,31 +251,14 @@ async def get_shared_items(
     if owner is None:
         raise HTTPException(404, "Invalid share link")
 
-    result = await db.execute(
-        select(Item).where(
-            Item.user_id == owner.id,
-            Item.shared_with_family == True,
-            Item.title.is_not(None),
+    enriched = await get_owner_shared_items(db, owner.id)
+    return [
+        SharedItemResponse(
+            id=e["item"].id,
+            title=e["item"].title,
+            image_url=e["item"].image_url,
+            interest_count = e["interest_count"],
+            status=e["status"],
         )
-    )
-
-    items = result.scalars().all()
-
-    shared_items = []
-    for item in items:
-        interest_result = await db.execute(
-            select(ItemInterest).where(ItemInterest.item_id == item.id)
-        )
-
-        interests = interest_result.scalars().all()
-        is_claimed = any(i.status == InterestStatus.claimed for i in interests)
-
-        shared_items.append(SharedItemResponse(
-            id=item.id,
-            title=item.title,
-            image_url=item.image_url,
-            interest_count=len(interests),
-            status="Claimed" if is_claimed else "Unclaimed",
-        ))
-
-    return shared_items
+        for e in enriched
+    ]
