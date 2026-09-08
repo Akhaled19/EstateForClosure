@@ -92,3 +92,20 @@ export async function finalizeItem(itemId: string, payload: ItemFinalizePayLoad)
 
   return res.json();
 }
+
+export async function setItemShare(itemId : string, shared: boolean): Promise<ItemDetail> {
+  const res = await fetch(`${API_BASE}/items/${itemId}/share`, {
+    method: "PATCH",
+    headers: {
+      ...(await authHeaders()),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({shared_with_family: shared})
+  });
+  
+  if(!res.ok){
+    throw new Error(`Failed to update share status: ${res.status}`);
+  }
+
+  return res.json();
+}

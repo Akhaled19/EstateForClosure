@@ -1,6 +1,7 @@
 import { useState } from "react";
 import InvenRows from "./InvenRows";
 import InvenSearch from "./InvenSearch";
+import { setItemShare } from "../../services/items";
 
 
 export type Status = "Unlisted" | "Listed" | "Sold" | "Shipped";
@@ -80,17 +81,19 @@ export default function InvenTable({ onEbayToast }: Prop) {
     return searchMatch && statusMatch;
   });
 
-  function toggleFamilyShare(id:string) {
-    setInvenItems(prev =>
-      prev.map(item =>
-        item.id === id
-          ? {
-              ...item,
-              sharedWithFamily: !item.sharedWithFamily
-            }
-          : item
-      )
-    );
+  async function toggleFamilyShare(id:string) {
+    const item = invenItems.find((i) => i.id === id);
+    if (!item) return;
+
+    try {
+      await setItemShare(id, !item.sharedWithFamily);
+      setInvenItems((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, sharedWithFamily: !i.sharedWithFamily } : i))
+      );
+    }
+    catch (err){
+      alert("Couldn't update sharing status. Please try again");
+    }
   }
 
   function updateItemStatus(id: string, status: Status) {

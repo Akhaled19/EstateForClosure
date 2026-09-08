@@ -2,22 +2,26 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from motor.motor_asyncio import AsyncIOMotorDatabase 
-from sqlalchemy import select
+from sqlalchemy import select, func 
 from sqlalchemy.ext.asyncio import AsyncSession 
 
 from app.db.postgres import get_db
 from app.db.mongo import get_mongo
 from app.core.deps import get_current_user
 from app.models.item import Item, ItemStatus, ItemCondition
-from app.schemas.item_scan_draft import ItemScanDraft, ScanResponse, ItemDetailResponse, ItemFinalizeRequest
+from app.models.profile import Profile
+from app.schemas.item_scan_draft import ScanResponse, ItemDetailResponse, ItemFinalizeRequest, ItemShareRequest, SharedItemResponse, OwnerSharedItemResponse
 from app.services.storage_service import upload_item_image
-from app.services import item_scan_draft_service as draft_service 
+from app.services import item_scan_draft_service as draft_service
+from app.services.get_owner_shared_items import get_owner_shared_items
 from app.worker.actors import run_ai_scan
+ 
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/items", tags=["items"])
 
 MAX_IMAGE_BYTES = 10 * 1024 * 1024 #10MB
+
 
 #insert the item into postgres 
 @router.post("/scan", response_model=ScanResponse, status_code=202)
@@ -58,6 +62,24 @@ async def scan_item(
 
     return ScanResponse(item_id=item.id, ai_status="processing", image_url=image_url)
 
+#fetch the items that are shared with family 
+@router.get("/family-view", response_model=list[OwnerSharedItemResponse])
+async def get_family_view( 
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    enriched = await get_owner_shared_items(db, current_user.id)
+    return [
+        OwnerSharedItemResponse(
+            id=e["item"].id,
+            title=e["item"].title,
+            image_url=e["item"].image_url,
+            date=e["item"].created_at.strftime("%m/%d/%Y"),
+            interest_count=e["interest_count"],
+            status=e["status"],
+        )
+        for e in enriched
+    ]
 
 #fetch the item row from Postgres by item_id
 @router.get("/{item_id}", response_model=ItemDetailResponse)
@@ -173,3 +195,64 @@ async def finalize_item(
         dimensions=item.dimensions,
         asking_price=item.asking_price,
     )
+
+#explicity set the item's share status
+@router.patch("/{item_id}/share", response_model=ItemDetailResponse)
+async def set_item_share(
+    item_id: str,
+    payload: ItemShareRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    result = await db.execute(select(Item).where(Item.id == item_id))
+    item = result.scalar_one_or_none()
+
+    if item is None:
+        raise HTTPException(404, "Item not found")
+    
+    if str(item.user_id) != str(current_user.id):
+        raise HTTPException(403, "Not your item")
+    
+    item.shared_with_family = payload.shared_with_family
+    await db.commit()
+    await db.refresh(item)
+
+    return ItemDetailResponse(
+        id = item.id,
+        is_finalized = item.title is not None,
+        status = item.status.value, 
+        image_url = item.image_url,
+        title = item.title,
+        description = item.description, 
+        category = item.category,
+        condition = item.condition.value if item.condition else None,
+        brand = item.brand,
+        dimensions = item.dimensions,
+        asking_price = item.asking_price,
+        shared_with_family = item.shared_with_family, 
+    )
+
+
+#fetch the interest items 
+@router.get("/shared/{share_token}", response_model=list[SharedItemResponse])
+async def get_shared_items(
+    share_token: str,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Profile).where(Profile.share_token == share_token))
+    owner = result.scalar_one_or_none()
+
+    if owner is None:
+        raise HTTPException(404, "Invalid share link")
+
+    enriched = await get_owner_shared_items(db, owner.id)
+    return [
+        SharedItemResponse(
+            id=e["item"].id,
+            title=e["item"].title,
+            image_url=e["item"].image_url,
+            interest_count = e["interest_count"],
+            status=e["status"],
+        )
+        for e in enriched
+    ]
