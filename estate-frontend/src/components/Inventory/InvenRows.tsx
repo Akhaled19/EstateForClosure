@@ -4,6 +4,7 @@ import type { Item, Status } from "./InvenTable"
 
 
 
+type EbayToastType = "success" | "error";
 
 type Property = {
   item: Item;
@@ -11,10 +12,10 @@ type Property = {
   setOpenDropdown: (v: string | null) => void;
   toggleFamilyShare: (id: string) => void;
   updateItemStatus: (id: string, status: Status) => void;
-  onEbayListingSuccess: () => void;
+  onEbayToast: (message: string, type: EbayToastType) => void;
 };
 
-export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus, onEbayListingSuccess}: Property) {
+export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus, onEbayToast}: Property) {
   
   const showActions = (openDropdown === item.id);
   const [listing, setListing] = useState(false);
@@ -39,6 +40,8 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
       return data;
     } catch (error) {
       console.error("eBay listing failed:", error);
+
+      onEbayToast(error instanceof Error ? error.message : "Failed to create eBay Listing", "error");
       return null;
     } finally {
       setListing(false);
@@ -85,7 +88,7 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
     if (data) {
       console.log("Listing ID:", data.ebay_listing_id);
 
-      onEbayListingSuccess();
+      onEbayToast("Item successfully listed on eBay!", "success");
     }
   }
   
@@ -242,6 +245,8 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
                       const data = await cancelEbayListing(item.id);
                       if (data) {
                         console.log("eBay listing successfully cancelled!")
+
+                        onEbayToast("eBay listing successfully cancelled!", "success");
                       }
                     }}
                     disabled = {listing}

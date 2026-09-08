@@ -1,6 +1,7 @@
 import logging
 import httpx
 import base64
+import json
 
 
 from app.core.config import settings
@@ -91,13 +92,37 @@ async def refresh_ebay_access_token():
 
     return token_data["access_token"]
 
+async def get_ebay_application_token():
+    credentials = f"{settings.EBAY_APP_ID}:{settings.EBAY_CERT_ID}"
+    encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+    headers = {
+        "Authorization": f"Basic {encoded_credentials}",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    data = {
+        "grant_type": "client_credentials",
+        "scope": "https://api.ebay.com/oauth/api_scope",
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(f"{EBAY_API_URL}/identity/v1/oauth2/token", headers=headers, data=data)
+
+    if response.status_code != 200:
+        raise Exception(f"Failed to get eBay application token: {response.text}")
+
+    token_data = response.json()
+
+    return token_data["access_token"]
+
 
 
 async def create_inventory_item(
         item_id: str, 
         title: str, 
         description: str,
-        brand: str | None,
+        aspects: dict,
         condition: str | None,
     ):
 
@@ -118,14 +143,7 @@ async def create_inventory_item(
             "imageUrls": [
                 "https://fvkypuuhumnjzaevsxxk.supabase.co/storage/v1/object/sign/test/chair-image.jpg?token=eyJraWQiOiJkMjM2MGMyMy1iMmRmLTRjMzUtYmViZi1hMjVlNGI1ODYwYTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ0ZXN0L2NoYWlyLWltYWdlLmpwZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3ODc5MzExOTMsImV4cCI6MTgxOTQ2NzE5M30.QiyzktIOthWbAt7RYND8eZZR0FsBgzYS8fIVDbIofS4"
             ],
-            "aspects": {
-                "Item Length": ["30 in"],
-                "Item Height": ["31 in"],
-                "Type": ["Other"],
-                "Item Width": ["32 in"],
-                "Brand" : [brand or "Unbranded"],
-                "Color" : ["Brown"]
-            }
+            "aspects": aspects
         },
         "condition": "USED_EXCELLENT",
         "availability": {
@@ -308,44 +326,6 @@ async def update_offer():
 
     return response.status_code, response.text
 
-
-# temp to find valid ebay categories...
-async def find_categories(search_term: str):
-    access_token = await refresh_ebay_access_token()
-    url = f"{EBAY_API_URL}/commerce/taxonomy/v1/category_tree/0"
-
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-    }
-
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers)
-
-    if response.status_code != 200:
-        return response.status_code, response.text
-
-    tree = response.json()
-    matches = []
-
-    def search(node):
-        category_name = node.get("category", {}).get("categoryName", "")
-
-        if search_term.lower() in category_name.lower():
-            matches.append({
-                "categoryId": node.get("category", {}).get("categoryId"),
-                "categoryName": category_name,
-                "leaf": node.get("leafCategoryTreeNode", False),
-            })
-
-        for child in node.get("childCategoryTreeNodes", []):
-            search(child)
-
-    search(tree.get("rootCategoryNode", {}))
-    return 200, matches
-
-
-
 async def delete_offer(offer_id: str):
     access_token = await refresh_ebay_access_token()
 
@@ -363,3 +343,148 @@ async def delete_offer(offer_id: str):
         )
 
     return response.status_code, response.text
+
+
+async def get_category_suggestions(query: str):
+    access_token = await get_ebay_application_token()
+
+    url = f"{EBAY_API_URL}/commerce/taxonomy/v1/"f"category_tree/0/get_category_suggestions"
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Content-Language": "en-US",
+    }
+
+    params = {"q": query}
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.get(url, headers=headers, params=params)
+
+    return response.status_code, response.text
+
+
+
+async def get_item_aspects_for_category(category_id: str):
+    access_token = await get_ebay_application_token()
+
+    url = f"{EBAY_API_URL}/commerce/taxonomy/v1/"f"category_tree/0/get_item_aspects_for_category"
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Accept-Language": "en-US",
+    }
+
+    params = {"category_id": category_id}
+    
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.get(url, headers=headers, params=params)
+
+    return response.status_code, response.text
+
+
+
+
+async def get_category_aspects(category_id: str):
+    status_code, response = await get_item_aspects_for_category(category_id)
+
+    if status_code != 200:
+        return status_code, response
+
+    data = json.loads(response)
+
+    aspects = []
+
+    for aspect in data.get("aspects", []):
+        constraint = aspect.get("aspectConstraint", {})
+
+        aspects.append({
+            "name": aspect.get("localizedAspectName"),
+            "required": constraint.get("aspectRequired", False),
+            "usage": constraint.get("aspectUsage"),
+            "dataType": constraint.get("aspectDataType"),
+            "cardinality": constraint.get("itemToAspectCardinality"),
+            "mode": constraint.get("aspectMode"),
+            "variation": constraint.get("aspectEnabledForVariations", False),
+            "applicableTo": constraint.get("aspectApplicableTo", [])
+        })
+
+    return 200, aspects
+
+
+async def get_required_category_aspects(category_id: str):
+    status_code, aspects = await get_category_aspects(category_id)
+
+    if status_code != 200:
+        return status_code, aspects
+
+    required_aspects = [aspect for aspect in aspects if aspect.get("required") is True]
+
+    return 200, required_aspects
+
+async def find_ebay_category(title: str, category: str | None = None):
+    query = title
+
+    if category:
+        query = f"{category} {title}"
+
+
+    status_code, response = await get_category_suggestions(query)
+
+
+    if status_code != 200:
+        return status_code, response
+
+    data = json.loads(response)
+    suggestions = data.get("categorySuggestions", [])
+
+    if not suggestions:
+        return 404, "No eBay category suggestions found"
+
+    best_category = suggestions[0]["category"]
+
+    return 200, {
+        "category_id": best_category["categoryId"],
+        "category_name": best_category["categoryName"],
+    }
+
+async def get_ebay_category_and_aspects(title: str, category: str | None = None):
+    # find category
+    status_code, category_result = await find_ebay_category(title=title, category=category)
+
+    if status_code != 200:
+        return status_code, category_result
+
+    category_id = category_result["category_id"]
+
+    # get the required aspects for that category
+    status_code, aspects = await get_required_category_aspects(category_id)
+
+    if status_code != 200:
+        return status_code, aspects
+
+    return 200, {
+        "category_id": category_id,
+        "category_name": category_result["category_name"],
+        "required_aspects": aspects,
+    }
+
+# parse dimensions
+def parse_dimensions(dimensions: str | None):
+    if not dimensions:
+        return {}
+
+    parts = [part.strip() for part in dimensions.lower().split("x")]
+
+    if len(parts) != 3:
+        return {}
+
+    length, width, height = parts
+
+    return {
+        "Item Length": [f"{length} in"],
+        "Item Width": [f"{width} in"],
+        "Item Height": [f"{height} in"],
+    }

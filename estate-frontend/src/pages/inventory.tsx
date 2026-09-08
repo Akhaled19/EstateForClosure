@@ -19,11 +19,14 @@ export default function Inventory() {
   const copyTimeout = useRef<number | null>(null);
   const [showEbayToast, setShowEbayToast] = useState(false);
   const ebayToastTimeout = useRef<number | null>(null);
+  const [ebayToastMessage, setEbayToastMessage] = useState("");
+  const [ebayToastType, setEbayToastType] = useState<"success" | "error">("success");
 
-  function showEbayListingToast() {
+  function showEbayToastMessage(message: string, type: "success" | "error") {
+    setEbayToastMessage(message);
+    setEbayToastType(type);
     setShowEbayToast(true);
 
-  
     if (ebayToastTimeout.current) {
       clearTimeout(ebayToastTimeout.current)
     }
@@ -32,7 +35,6 @@ export default function Inventory() {
       setShowEbayToast(false);
     }, 4500);
   }
-  
 
   useEffect(() => {
     getShareLink()
@@ -112,10 +114,10 @@ export default function Inventory() {
 
       </div>
 
-      <InvenTable onEbayListingSuccess={showEbayListingToast} />
+      <InvenTable onEbayToast={showEbayToastMessage} />
 
       <ReviewToast show = {showSavedToast} />
-      <EbayListingToast show = {showEbayToast} />
+      <EbayListingToast show = {showEbayToast} message={ebayToastMessage} type={ebayToastType} />
       <SharePopup 
         show = {showSharePopup} 
         shareUrl={shareUrl} 
