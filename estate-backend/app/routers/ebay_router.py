@@ -9,11 +9,13 @@ from app.db.postgres import get_db
 from app.core.deps import get_current_user
 from app.models.item import Item, ItemStatus
 
+from app.schemas.ebay import EbayListingAspects
 
 from fastapi.responses import RedirectResponse
 from app.services.ebay_service import ( 
     ebay_auth_url,
-    get_ebay_category_and_aspects, 
+    get_ebay_category_and_aspects,
+    get_item_ebay_requirements, 
     update_offer, 
     get_offer,
     create_inventory_item, 
@@ -24,6 +26,7 @@ from app.services.ebay_service import (
     exchange_ebay_code,
     delete_offer,
     parse_dimensions,
+    get_missing_required_aspects,
 )
 
 logger = logging.getLogger(__name__)
@@ -52,6 +55,7 @@ async def ebay_auth_callback(code: str):
 @router.post("/list/{item_id}")
 async def list_item(
     item_id: str, 
+    listing_aspects: EbayListingAspects | None = None,
     db: AsyncSession = Depends(get_db),
     current_user= Depends(get_current_user),
 ):
@@ -85,6 +89,7 @@ async def list_item(
 
     dimensions = parse_dimensions(item.dimensions)
     aspects = {}
+    aspects.update(dimensions)
 
     for aspect in required_aspects:
         name = aspect["name"]
@@ -95,7 +100,18 @@ async def list_item(
         elif name in dimensions:
             aspects[name] = dimensions[name]
 
+    if listing_aspects:
+        aspects.update(listing_aspects.aspects)
 
+    missing_aspects = get_missing_required_aspects(required_aspects=required_aspects, available_aspects=aspects)
+
+    if missing_aspects:
+        raise HTTPException(status_code=400, detail={
+            "message" : f"Missing required aspects for eBay listing",
+            "category_id" : category_id,
+            "category_name": category_name,
+            "missing_aspects" : missing_aspects
+        },)
 
 
     status_code, response = await create_inventory_item(
@@ -277,3 +293,31 @@ async def test_category_and_aspects(title: str, category: str | None = None):
         "status": status_code,
         "result": result,
     }
+
+@router.get("/list/{item_id}/requirements")
+async def get_listing_requirements(
+    item_id: str,
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Item).where(Item.id == item_id))
+
+    item = result.scalar_one_or_none()
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    if str(item.user_id) != str(current_user.id):
+        raise HTTPException(status_code=403, detail="Not authorized to access this item")
+
+    status_code, requirements = await get_item_ebay_requirements(
+        title=item.title,
+        category=item.category,
+        brand=item.brand,
+        dimensions=item.dimensions,
+    )
+
+    if status_code != 200:
+        raise HTTPException(status_code=502, detail=f"Failed to determine eBay requirements: {requirements}")
+
+    return requirements

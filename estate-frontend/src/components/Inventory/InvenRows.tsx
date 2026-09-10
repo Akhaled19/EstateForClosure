@@ -1,6 +1,8 @@
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import type { Item, Status } from "./InvenTable"
+import EbayAspects from "../EbayAspects";
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
 
 
@@ -21,14 +23,23 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
   const [listing, setListing] = useState(false);
   const [showEbayAgreement, setShowEbayAgreement] = useState(false);
   const [showConfirmCancel, setShowConfirmCancel] = useState(false);
-
-
+  const [showEbayAspects, setShowEbayAspects] = useState(false);
+  const [missingAspects, setMissingAspects] = useState<any[]>([]);
+  const [ebayAspectValues, setEbayAspectValues] = useState<Record<string, string[]>>({});
+  const [ebayAspectErrors, setEbayAspectErrors] = useState("");
 
   async function createEbayListing(itemId: string) {
     try {
       setListing(true);
 
-      const response = await fetch(`http://localhost:8000/ebay/list/${itemId}`, {method: "POST"});
+      const response = await fetch(`http://localhost:8000/ebay/list/${itemId}`, 
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ aspects: ebayAspectValues }),
+      });
 
       const data = await response.json();
 
@@ -71,9 +82,30 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
     }
   }
 
-  function openEbayAgreement() {
+  async function openEbayAgreement() {
     setOpenDropdown(null);
-    setShowEbayAgreement(true);
+
+    try {
+      const response = await fetch(`http://localhost:8000/ebay/list/${item.id}/requirements`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to get eBay requirements");
+      }
+
+      setMissingAspects(data.missing_aspects);
+      if (data.missing_aspects.length > 0) {
+        setShowEbayAspects(true);
+      } else {
+        setShowEbayAgreement(true);
+      }
+
+    } catch (error) {
+      console.error("Failed to get eBay requirements:", error);
+
+      onEbayToast(
+        error instanceof Error ? error.message : "Failed to get eBay requirements", "error");
+    }
   }
 
   function openConfirmCancel() {
@@ -155,7 +187,6 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
 
 
 
-
         <td className = "p-4">
 
           <div className = "flex items-center gap-4"> 
@@ -176,6 +207,8 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
 
 
       </tr>
+
+
 
       {showEbayAgreement && (
         <tr>
@@ -215,6 +248,70 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
           </td>
         </tr>
       )}
+
+
+
+      {showEbayAspects && (
+        <tr>
+          <td colSpan={3}>
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+              
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+
+                <p className="text-gray-500 mb-6 review-warning flex items-start gap-2 text-sm">
+                  <ExclamationCircleIcon className = "w-6 h-6 shrink-0"/>
+                  eBay requires additional information in order to list the item. Please fill in any missing information.
+                </p>
+
+                <EbayAspects 
+                  missingAspects = {missingAspects}
+                  onAspectsChange = {setEbayAspectValues}
+                />
+                {ebayAspectErrors && (
+                  <p className = "text-sm review-warning flex items-start gap-2 !mt-4"> 
+                  <ExclamationCircleIcon className = "w-6 h-6 shrink-0"/>
+                  {ebayAspectErrors} 
+                  </p>
+                )}
+
+                <div className="flex justify-end gap-3 mt-6">
+
+                  <button
+                    className="px-4 py-2 rounded-lg border border-gray-500 hover:opacity-90"
+                    onClick={() => setShowEbayAspects(false)}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    className="px-4 py-2 rounded-lg bg-black text-white hover:opacity-90"
+                    onClick={() => {
+                      const missingValues = missingAspects.some((aspect) =>
+                        !ebayAspectValues[aspect.name] || ebayAspectValues[aspect.name].length === 0 || ebayAspectValues[aspect.name][0].trim() === ""
+                      );
+                      
+                      if (missingValues) {
+                        setEbayAspectErrors("Please fill in all required fields before continuing.");
+                        return;
+                      }
+                      setEbayAspectErrors("");
+                      setShowEbayAspects(false);
+                      setShowEbayAgreement(true);
+                    }}
+                  >
+                    Continue
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+          </td>
+        </tr>
+      )}
+
+
 
       {showConfirmCancel && (
         <tr>
@@ -259,7 +356,6 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
               </div>
             
             </div>
-
           </td>
         </tr>
       )}

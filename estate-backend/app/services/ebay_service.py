@@ -408,7 +408,11 @@ async def get_category_aspects(category_id: str):
             "cardinality": constraint.get("itemToAspectCardinality"),
             "mode": constraint.get("aspectMode"),
             "variation": constraint.get("aspectEnabledForVariations", False),
-            "applicableTo": constraint.get("aspectApplicableTo", [])
+            "applicableTo": constraint.get("aspectApplicableTo", []),
+            "values": [
+                value.get("localizedValue") for value in aspect.get("aspectValues", [])
+            ]
+
         })
 
     return 200, aspects
@@ -429,7 +433,6 @@ async def find_ebay_category(title: str, category: str | None = None):
 
     if category:
         query = f"{category} {title}"
-
 
     status_code, response = await get_category_suggestions(query)
 
@@ -482,9 +485,66 @@ def parse_dimensions(dimensions: str | None):
         return {}
 
     length, width, height = parts
+    length = length.replace("inches", "").replace("inch", "").replace("in", "").strip() 
+    width = width.replace("inches", "").replace("inch", "").replace("in", "").strip() 
+    height = height.replace("inches", "").replace("inch", "").replace("in", "").strip()
 
     return {
         "Item Length": [f"{length} in"],
         "Item Width": [f"{width} in"],
         "Item Height": [f"{height} in"],
+    }
+
+
+def get_missing_required_aspects(required_aspects: list, available_aspects: dict):
+    missing_aspects = []
+
+    for aspect in required_aspects:
+        name = aspect["name"]
+
+        if name not in available_aspects:
+            missing_aspects.append(aspect)
+
+    return missing_aspects
+
+
+async def get_item_ebay_requirements(
+    title: str,
+    category: str | None,
+    brand: str | None,
+    dimensions: str | None,
+):
+    # find ebay category and required aspects
+    status_code, category_result = await get_ebay_category_and_aspects(title=title, category=category)
+
+    if status_code != 200:
+        return status_code, category_result
+
+    category_id = category_result["category_id"]
+    category_name = category_result["category_name"]
+    required_aspects = category_result["required_aspects"]
+
+    # build aspects that we already know 
+    dimensions_aspects = parse_dimensions(dimensions)
+
+    aspects = {}
+
+    for aspect in required_aspects:
+        name = aspect["name"]
+
+        if name == "Brand":
+            aspects[name] = [brand or "Unbranded"]
+
+        elif name in dimensions_aspects:
+            aspects[name] = dimensions_aspects[name]
+
+    # find missing aspects
+    missing_aspects = get_missing_required_aspects(required_aspects=required_aspects, available_aspects=aspects)
+
+    return 200, {
+        "category_id": category_id,
+        "category_name": category_name,
+        "required_aspects": required_aspects,
+        "known_aspects": aspects,
+        "missing_aspects": missing_aspects,
     }
