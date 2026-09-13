@@ -1,0 +1,250 @@
+.browse-page {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #F2F4F7;
+  color: #1B2A4A;
+  min-height: 100vh;
+}
+
+/* Category tabs */
+.browse-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 24px 56px;
+  overflow-x: auto;
+  border-bottom: 1px solid #E5E9F0;
+  background: #fff;
+}
+
+.browse-tab {
+  flex-shrink: 0;
+  padding: 9px 18px;
+  border-radius: 20px;
+  border: 1px solid #CDD3DC;
+  background: #fff;
+  color: #4A5568;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.browse-tab:hover {
+  border-color: #D4621A;
+  color: #D4621A;
+}
+
+.browse-tab.is-active {
+  background: #1B2A4A;
+  border-color: #1B2A4A;
+  color: #fff;
+}
+
+/* Body layout */
+.browse-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 0 72px;
+  box-sizing: border-box;
+}
+
+/* Filters sidebar */
+.browse-filters {
+  width: 220px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #E5E9F0;
+  border-radius: 12px;
+  padding: 20px;
+  box-sizing: border-box;
+  position: sticky;
+  top: 24px;
+}
+
+.browse-filters h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 18px;
+  color: #1B2A4A;
+}
+
+.browse-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.browse-filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6B7A90;
+  margin-bottom: 4px;
+}
+
+.browse-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #4A5568;
+  cursor: pointer;
+}
+
+.browse-price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.browse-price-inputs input {
+  width: 0;
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #CDD3DC;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+
+.browse-price-inputs input:focus {
+  border-color: #D4621A;
+}
+
+.browse-price-inputs span {
+  color: #A0AABA;
+  font-size: 12px;
+}
+
+.browse-filter-group > input[type="text"] {
+  padding: 8px 10px;
+  border: 1px solid #CDD3DC;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+
+.browse-filter-group > input[type="text"]:focus {
+  border-color: #D4621A;
+}
+
+/* Results */
+.browse-results {
+  flex: 1;
+}
+
+.browse-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  font-size: 13px;
+  color: #6B7A90;
+}
+
+.browse-results-head select {
+  padding: 8px 12px;
+  border: 1px solid #CDD3DC;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1B2A4A;
+  background: #fff;
+  outline: none;
+}
+
+.browse-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.browse-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #E5E9F0;
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.browse-card:hover {
+  border-color: #D4621A;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(27, 42, 74, 0.1);
+}
+
+.browse-card-image {
+  width: 100%;
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+  background-color: #E5E9F0;
+}
+
+.browse-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+}
+
+.browse-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1B2A4A;
+}
+
+.browse-card-condition {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6B7A90;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.browse-card-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #D4621A;
+  margin-top: 2px;
+}
+
+.browse-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #6B7A90;
+  font-size: 14px;
+  padding: 48px 0;
+}
+
+@media (max-width: 900px) {
+  .browse-body {
+    flex-direction: column;
+    padding: 24px;
+  }
+  .browse-filters {
+    width: 100%;
+    position: static;
+  }
+  .browse-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .browse-tabs {
+    padding: 20px 24px;
+  }
+}
+
+@media (max-width: 560px) {
+  .browse-grid {
+    grid-template-columns: 1fr;
+  }
+}

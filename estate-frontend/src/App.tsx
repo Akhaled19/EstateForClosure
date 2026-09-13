@@ -8,8 +8,13 @@ import Scan from "./pages/scan";
 import Login from "./pages/login";
 import SignUp from "./pages/signup";
 import ItemPage from "./pages/item";
+import FamilyShare from "./pages/FamilyShare.tsx";
+import FamilyFriends from "./pages/FamilyFriendsOwner.tsx";
+import Review from "./pages/review";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
+import LandingPage from "./pages/landing-page.tsx";
+import BrowsePage from "./pages/browse-page.tsx";
 
 
 function Layout() {
@@ -19,7 +24,7 @@ function Layout() {
   return (
     <div className = " min-h-screen bg-white"> 
       {!hideNavbar && <Navbar />}
-      <div className = " overflow-auto">
+      <div className = "overflow-auto">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />}/>
@@ -29,8 +34,15 @@ function Layout() {
           <Route path="/login" element={<Login />}/>
           <Route path="/signup" element={<SignUp />}/>
           <Route path="/items/:id"  element={<ItemPage />}/>
+          <Route path="/estateItemsF&F/:ownerID" element={<FamilyShare />}/>
+          <Route path="/family-friends-owner-view" element={<FamilyFriends />}/>
+          <Route path="/items/:id/review" element={<Review />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/landing-page" element={<LandingPage />} />
+          <Route path="/browse" element={<BrowsePage />} />
+
+
         </Routes>
       </div>
     </div>

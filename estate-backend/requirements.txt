@@ -14,3 +14,6 @@ dnspython
 psycopg2-binary
 email-validator
 anthropic
+pytest
+pytest-asyncio
+httpx

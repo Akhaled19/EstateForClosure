@@ -11,4 +11,4 @@ class Profile(Base):
     email: Mapped[str] = mapped_column(String, nullable=True)
     full_name: Mapped[str] = mapped_column(String, nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())
-    
+    share_token: Mapped[str] = mapped_column(String, nullable=True, unique=True)

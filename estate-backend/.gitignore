@@ -1,5 +1,5 @@
 .env
-test_*.py
+test_check.py
 scratch_*.py
 __pycache__/
 *.pyc

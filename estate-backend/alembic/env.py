@@ -7,6 +7,7 @@ from alembic import context
 
 from app.models.item import Item 
 from app.models.profile import Profile 
+from app.models.item_interest import ItemInterest
 from app.db.postgres import Base
 
 from app.core.config import settings
