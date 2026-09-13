@@ -1,4 +1,4 @@
-from sqlalchemy import String, Float, DateTime, ForeignKey, func, Enum
+from sqlalchemy import String, Float, DateTime, ForeignKey, func, Enum, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.postgres import Base
@@ -34,6 +34,7 @@ class Item(Base):
     updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
     description: Mapped[str] = mapped_column(String, nullable=True)
     category: Mapped[str] = mapped_column(String, nullable=True)
-    condition: Mapped[ItemCondition] = mapped_column(Enum(ItemCondition), nullable=True)
+    condition: Mapped[ItemCondition] = mapped_column(Enum(ItemCondition, values_callable=lambda x: [e.value for e in x]), nullable=True,)
     brand: Mapped[str] = mapped_column(String, nullable=True)
     dimensions: Mapped[str] = mapped_column(String, nullable=True)
+    shared_with_family: Mapped[bool] = mapped_column(Boolean, default=False)

@@ -57,6 +57,42 @@ async def scan_item(
 
     return ScanResponse(item_id=item.id, ai_status="processing", image_url=image_url)
 
+#fetching all items
+@router.get("/", response_model=list[ItemDetailResponse])
+async def list_items(
+    status: str | None = None,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    query = select(Item).where(Item.user_id == current_user.id)
+    if status:
+        try:
+            status_enum = ItemStatus(status)
+        except ValueError:
+            raise HTTPException(400, f"Invalid status: {status}")
+        query = query.where(Item.status == status_enum)
+
+    result = await db.execute(query)
+    items = result.scalars().all()
+
+    return [
+        ItemDetailResponse(
+            id=item.id,
+            is_finalized=item.title is not None,
+            status=item.status.value,
+            image_url=item.image_url,
+            title=item.title,
+            description=item.description,
+            category=item.category,
+            condition=item.condition.value if item.condition else None,
+            brand=item.brand,
+            dimensions=item.dimensions,
+            asking_price=item.asking_price,
+            shared_with_family=item.shared_with_family,
+        )
+        for item in items
+    ]
+
 
 #fetch the item row from Postgres by item_id
 @router.get("/{item_id}", response_model=ItemDetailResponse)
