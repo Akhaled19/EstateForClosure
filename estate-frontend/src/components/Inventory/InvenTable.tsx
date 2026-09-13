@@ -15,8 +15,10 @@ export type Item = {
   sharedWithFamily: boolean;
 };
 
+type EbayToastType = "success" | "error";
+
 type Prop = {
-  onEbayListingSuccess: () => void;
+  onEbayToast: (message: string, type: EbayToastType) => void;
 };
 
 
@@ -66,7 +68,7 @@ type Prop = {
   ];
 
 
-export default function InvenTable({ onEbayListingSuccess }: Prop) {
+export default function InvenTable({ onEbayToast }: Prop) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -161,8 +163,8 @@ export default function InvenTable({ onEbayListingSuccess }: Prop) {
                   setOpenDropdown={setOpenDropdown} 
                   toggleFamilyShare = {toggleFamilyShare} 
                   updateItemStatus={updateItemStatus} 
-                  onEbayListingSuccess={onEbayListingSuccess}
-                  />
+                  onEbayToast={onEbayToast}
+                />
               ))
             )}
 

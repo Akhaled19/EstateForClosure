@@ -9,21 +9,24 @@ from app.db.postgres import get_db
 from app.core.deps import get_current_user
 from app.models.item import Item, ItemStatus
 
+from app.schemas.ebay import EbayListingAspects
 
 from fastapi.responses import RedirectResponse
 from app.services.ebay_service import ( 
-    ebay_auth_url, 
+    ebay_auth_url,
+    get_ebay_category_and_aspects,
+    get_item_ebay_requirements, 
     update_offer, 
     get_offer,
     create_inventory_item, 
     create_inventory_location, 
     create_offer, 
     publish_offer,
-    find_categories,
     get_existing_offer,
     exchange_ebay_code,
     delete_offer,
-    
+    parse_dimensions,
+    get_missing_required_aspects,
 )
 
 logger = logging.getLogger(__name__)
@@ -52,6 +55,7 @@ async def ebay_auth_callback(code: str):
 @router.post("/list/{item_id}")
 async def list_item(
     item_id: str, 
+    listing_aspects: EbayListingAspects | None = None,
     db: AsyncSession = Depends(get_db),
     current_user= Depends(get_current_user),
 ):
@@ -62,6 +66,9 @@ async def list_item(
     if item is None:
         raise HTTPException(404, "item not found")
 
+    if item.ebay_listing_id:
+        raise HTTPException(400, "Item already has an eBay listing")
+
     if str(item.user_id) != str(current_user.id):
         raise HTTPException(403, "You don't own this item")
 
@@ -70,11 +77,48 @@ async def list_item(
     if item.asking_price is None:
         raise HTTPException(400, "Item needs a asking price")
 
+
+    status_code, category_result = await get_ebay_category_and_aspects(title=item.title, category=item.category)
+
+    if status_code != 200:
+        raise HTTPException(502, f"Failed to identify eBay category: {category_result}")
+
+    category_id = category_result["category_id"]
+    category_name = category_result["category_name"]
+    required_aspects = category_result["required_aspects"]
+
+    dimensions = parse_dimensions(item.dimensions)
+    aspects = {}
+    aspects.update(dimensions)
+
+    for aspect in required_aspects:
+        name = aspect["name"]
+
+        if name == "Brand":
+            aspects[name] = [item.brand or "Unbranded"]
+
+        elif name in dimensions:
+            aspects[name] = dimensions[name]
+
+    if listing_aspects:
+        aspects.update(listing_aspects.aspects)
+
+    missing_aspects = get_missing_required_aspects(required_aspects=required_aspects, available_aspects=aspects)
+
+    if missing_aspects:
+        raise HTTPException(status_code=400, detail={
+            "message" : f"Missing required aspects for eBay listing",
+            "category_id" : category_id,
+            "category_name": category_name,
+            "missing_aspects" : missing_aspects
+        },)
+
+
     status_code, response = await create_inventory_item(
         item_id = item.id,
         title = item.title,
         description = item.description or "",
-        brand = item.brand,
+        aspects = aspects,
         condition = item.condition.value if item.condition else None,
     )
 
@@ -99,7 +143,7 @@ async def list_item(
 
     # if no offer, create one
     if offer_id is None:
-        status_code, response = await create_offer(item_id=item.id, price=item.asking_price)
+        status_code, response = await create_offer(item_id=item.id, price=item.asking_price, category_id=category_id)
 
         if status_code not in (200, 201):
             raise HTTPException(502, f"eBay offer creation failed: {response}")
@@ -195,7 +239,12 @@ async def test_inventory():
         item_id="estate-9",
         title="test chair 9",
         description="test chair 9 - description",
-        brand="Unbranded",
+        aspects = {
+            "Brand": ["Unbranded"],
+            "Item Length": ["30 in"],
+            "Item Height": ["31 in"],
+            "Item Width": ["32 in"],
+        },
         condition="NEW",
     )
 
@@ -224,10 +273,6 @@ async def test_offer_details():
 async def test_update_offer():
     return await update_offer()
 
-# searching for ebay categories
-@router.get("/test-find-categories")
-async def test_find_categories():
-    return await find_categories("Chair")
 
 
 @router.get("/test-existing-offer/{item_id}")
@@ -237,3 +282,42 @@ async def test_existing_offer(item_id: str):
 @router.delete("/test-delete-offer/{offer_id}")
 async def test_delete_offer(offer_id: str):
     return await delete_offer(offer_id)
+
+
+
+@router.get("/test-category-and-aspects")
+async def test_category_and_aspects(title: str, category: str | None = None):
+    status_code, result = await get_ebay_category_and_aspects(title=title, category=category)
+
+    return {
+        "status": status_code,
+        "result": result,
+    }
+
+@router.get("/list/{item_id}/requirements")
+async def get_listing_requirements(
+    item_id: str,
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Item).where(Item.id == item_id))
+
+    item = result.scalar_one_or_none()
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    if str(item.user_id) != str(current_user.id):
+        raise HTTPException(status_code=403, detail="Not authorized to access this item")
+
+    status_code, requirements = await get_item_ebay_requirements(
+        title=item.title,
+        category=item.category,
+        brand=item.brand,
+        dimensions=item.dimensions,
+    )
+
+    if status_code != 200:
+        raise HTTPException(status_code=502, detail=f"Failed to determine eBay requirements: {requirements}")
+
+    return requirements
