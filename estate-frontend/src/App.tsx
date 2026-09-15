@@ -29,11 +29,11 @@ function Layout() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />}/>
-          {/* <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>}/> */}
-          <Route path="/listings" element= {<Inventory />}/>
+          <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>}/>
+          {/* <Route path="/listings" element= {<Inventory />}/> */}
 
-          {/* <Route path="/listings" element={<ProtectedRoute><Listings /></ProtectedRoute>}/> */}
-          <Route path="/listings" element= {<Listings />}/>
+          <Route path="/listings" element={<ProtectedRoute><Listings /></ProtectedRoute>}/>
+          {/* <Route path="/listings" element= {<Listings />}/> */}
 
           <Route path="/scan" element={<Scan />}/>
           <Route path="/login" element={<Login />}/>
@@ -41,13 +41,13 @@ function Layout() {
           <Route path="/items/:id"  element={<ItemPage />}/>
 
 
-          {/* <Route path="/estateItemsF&F/:ownerID" element={<ProtectedRoute><FamilyShare /></ProtectedRoute>}/> */}
-          <Route path="/estateItemsF&F/:ownerID" element= {<FamilyShare />}/>
+          <Route path="/estateItemsF&F/:ownerID" element={<ProtectedRoute><FamilyShare /></ProtectedRoute>}/>
+          {/* <Route path="/estateItemsF&F/:ownerID" element= {<FamilyShare />}/> */}
 
           
           
-          {/* <Route path="/family-friends-owner-view" element={<ProtectedRoute><FamilyFriends /></ProtectedRoute>}/> */}
-           <Route path="/family-friends-owner-view" element= {<FamilyFriends />}/>
+          <Route path="/family-friends-owner-view" element={<ProtectedRoute><FamilyFriends /></ProtectedRoute>}/>
+           {/* <Route path="/family-friends-owner-view" element= {<FamilyFriends />}/> */}
 
           <Route path="/items/:id/review" element={<Review />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
