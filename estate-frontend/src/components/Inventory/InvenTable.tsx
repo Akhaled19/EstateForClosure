@@ -118,7 +118,8 @@ export default function InvenTable({ onEbayListingSuccess }: Prop) {
         setStatus={setStatus}
       />
 
-      <div className = "md:flex md:justify-center mt-6 overflow-x-auto"> 
+      {/* Desktop table */}
+      <div className = "hidden md:flex md:justify-center mt-6 overflow-x-auto">
         <table className="w-[600px] bg-white shadow-lg rounded-xl table-fixed shrink-0">
             <colgroup>
               <col className="w-[80px]" />  
@@ -157,6 +158,7 @@ export default function InvenTable({ onEbayListingSuccess }: Prop) {
                 <InvenRows 
                   key={item.id} 
                   item={item} 
+                  variant="table"
                   openDropdown = {openDropdown} 
                   setOpenDropdown={setOpenDropdown} 
                   toggleFamilyShare = {toggleFamilyShare} 
@@ -169,6 +171,28 @@ export default function InvenTable({ onEbayListingSuccess }: Prop) {
           </tbody>
         
         </table>
+      </div>
+
+      {/* Mobile card list */}
+      <div className = "md:hidden mt-6 flex flex-col gap-3">
+        {filtered.length === 0 ? (
+          <p className = "text-center py-6 text-black font-bold">
+            No results found.
+          </p>
+        ) : (
+          filtered.map((item) => (
+            <InvenRows
+              key={item.id}
+              item={item}
+              variant="card"
+              openDropdown={openDropdown}
+              setOpenDropdown={setOpenDropdown}
+              toggleFamilyShare={toggleFamilyShare}
+              updateItemStatus={updateItemStatus}
+              onEbayListingSuccess={onEbayListingSuccess}
+              />
+          ))
+        )}
       </div>
 
     </div>

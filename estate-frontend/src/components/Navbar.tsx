@@ -1,24 +1,28 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../services/auth";
 
 const navLinks = [
-  { path: "/dashboard", name: "Dashboard" },
-  { path: "/inventory", name: "Inventory" },
-  { path: "/listings", name: "Listings" },
-  { path: "/scan", name: "Scan new item" },
-  { path: "/family-friends-owner-view", name: "Family & Friends" }
+  { path: "/dashboard", name: "Dashboard", requiresAuth: false },
+  { path: "/inventory", name: "Inventory", requiresAuth: false },
+  { path: "/listings", name: "Listings", requiresAuth: false },
+  { path: "/scan", name: "Scan new item", requiresAuth: false },
+  { path: "/family-friends-owner-view", name: "Family & Friends", requiresAuth: true }
 ];
-
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate()
   const [openSidebar, setOpenSidebar] = useState(false);
   const [search, setSearch] = useState("");
-  const signedIn = localStorage.getItem("token");
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const { session } = useAuth();
+
+  const permittedNavLinks = navLinks.filter((link) => !link.requiresAuth || session);
 
   return (
     <div>
@@ -34,18 +38,36 @@ export default function Navbar() {
           </h2>
         </button>
 
-
         <input
           type="text"
           placeholder="Search for anything..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="search-bar"
+          className="search-bar hidden sm:block"
         />
 
-
+        <button
+          onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+          className="sm:hidden ml-auto"
+        >
+          <MagnifyingGlassIcon className="w-6" />
+        </button>
 
       </div>
+
+      {mobileSearchOpen && (
+        <div className="sm:hidden px-4 py-2.5 bg-white border-b-2 border-gray-200">
+          <input
+            type="text"
+            autoFocus
+            placeholder="Search for anything..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="search-bar w-full ml-0"
+          />
+        </div>
+      )}
+
       {
         openSidebar && (
           <div
@@ -66,7 +88,7 @@ export default function Navbar() {
         )}
 
         <div className="navbar-links">
-          {navLinks.map((link) => {
+          {permittedNavLinks.map((link) => {
             const active = location.pathname === link.path;
 
             return (
@@ -86,7 +108,7 @@ export default function Navbar() {
         </div>
 
         <div className="sidebar-signIn nav-link">
-          {signedIn ? (
+          {session ? (
             <Link
               to="/account"
               onClick={() => setOpenSidebar(false)}

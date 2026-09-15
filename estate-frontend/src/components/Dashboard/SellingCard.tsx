@@ -9,7 +9,7 @@ export default function SellingCard() {
 
       <div className="flex justify-between py-3 border-b border-gray-200">
 
-        <div className = "card-values">
+        <div className="text-[#D4621A] font-bold">
           Pending Shipments
         </div>
 
@@ -22,7 +22,7 @@ export default function SellingCard() {
 
       <div className="flex justify-between py-3 border-b border-gray-200">
 
-        <div className = "card-values">
+        <div className="text-[#D4621A] font-bold">
           Offers Waiting
         </div>
 
@@ -35,7 +35,7 @@ export default function SellingCard() {
 
       <div className="flex justify-between py-3 border-b border-gray-200">
 
-        <div className = "card-values">
+        <div className="text-[#D4621A] font-bold">
           Unsold Listings (30+ days)
         </div>
 
@@ -48,7 +48,7 @@ export default function SellingCard() {
 
       <div className="flex justify-between py-3">
 
-        <div className = "card-values">
+        <div className="text-[#D4621A] font-bold">
           Listings Ending Soon
         </div>
 

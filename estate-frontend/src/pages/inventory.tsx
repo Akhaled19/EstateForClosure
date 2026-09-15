@@ -76,7 +76,7 @@ export default function Inventory() {
 
 
   return (
-    <div className ="flex-1 px-10 pt-6 bg-gray-100 min-h-screen">
+    <div className ="flex-1 px-4 sm:px-10 pt-6 bg-gray-100 min-h-screen">
 
       <ShareLinkCopied show = {showCopiedPopup} />
 

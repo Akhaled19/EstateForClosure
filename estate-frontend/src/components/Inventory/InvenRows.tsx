@@ -7,6 +7,7 @@ import type { Item, Status } from "./InvenTable"
 
 type Property = {
   item: Item;
+  variant: "table" | "card";
   openDropdown: string | null;
   setOpenDropdown: (v: string | null) => void;
   toggleFamilyShare: (id: string) => void;
@@ -14,7 +15,7 @@ type Property = {
   onEbayListingSuccess: () => void;
 };
 
-export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus, onEbayListingSuccess}: Property) {
+export default function InvenRows({item, variant, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus, onEbayListingSuccess}: Property) {
   
   const showActions = (openDropdown === item.id);
   const [listing, setListing] = useState(false);
@@ -88,7 +89,164 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
       onEbayListingSuccess();
     }
   }
-  
+
+  const actionsDropdown = showActions && (
+    <div className = "absolute right-0 mt-1 w-max min-w-32 bg-white rounded-xl shadow-xl border border-gray-400 z-50">
+
+      <button className = "actions-buttons">
+        Edit
+      </button>
+
+      <button
+        className = "actions-buttons"
+        onClick = {() => {
+          toggleFamilyShare(item.id);
+          setOpenDropdown(null);
+        }}
+      >
+        {item.sharedWithFamily ? "Unshare from F&F" : "Share to F&F"}
+      </button>
+
+      {item.status === "Listed" ? (
+        <button
+          className = "actions-buttons"
+          onClick={openConfirmCancel}
+          disabled = {listing}
+        >
+          {listing ? "Cancelling listing..." : "Cancel eBay Listing"}
+        </button>
+      ) : (
+        <button
+          className = "actions-buttons"
+          onClick={openEbayAgreement}
+          disabled={listing}
+        >
+          {listing ? "Creating listing..." : "Create eBay Listing"}
+        </button>
+      )
+
+      }
+
+      <button className = "actions-buttons">
+        Delete
+      </button>
+
+    </div>
+  );
+
+  const modals = (
+    <>
+      {showEbayAgreement && (
+        <div className = "fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+          <div className = "bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+
+            <p className = "text-gray-500 mb-4">
+              By continuing, you agree to comply to eBay's terms and conditions
+              and by clicking "Agree & Create Listing" you will create a
+              public eBay listing for your item and make it available for purchases.
+            </p>
+
+            <div className = "flex justify-end gap-3">
+
+              <button
+                className = "px-4 py-2 rounded-lg border border-gray-500 hover:opacity-90"
+                onClick = {() => setShowEbayAgreement(false)}
+                disabled={listing}
+              >
+                Cancel
+              </button>
+
+              <button
+                className = "px-4 py-2 rounded-lg bg-black text-white hover:opacity-90"
+                onClick={agreedToEbayListing}
+                disabled={listing}
+              >
+                {listing ? "Creating listing..." : "Agree & Create Listing"}
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {showConfirmCancel && (
+        <div className = "fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+          <div className = "bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+
+            <p className = "text-gray-500 mb-4">
+              Are you sure you want to cancel this eBay listing?
+              By cancelling you agree to end the listing for your item
+              and make it no longer available for purchase.
+            </p>
+
+            <div className = "flex justify-end gap-3">
+
+              <button
+                className = "px-4 py-2 rounded-lg border border-gray-500 hover:opacity-90"
+                onClick={() => setShowConfirmCancel(false)}
+                disabled={listing}
+              >
+                No
+              </button>
+
+              <button
+                className = "px-4 py-2 rounded-lg bg-black text-white hover:opacity-90"
+                onClick = {async () => {
+                  setShowConfirmCancel(false);
+                  const data = await cancelEbayListing(item.id);
+                  if (data) {
+                    console.log("eBay listing successfully cancelled!")
+                  }
+                }}
+                disabled = {listing}
+              >
+                {listing ? "Cancelling listing..." : "Yes, Cancel Listing"}
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+    </>
+  );
+
+  if (variant === "card") {
+    return (
+      <>
+        <div className = "bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <div className = "flex items-start gap-3">
+
+            <div className = "w-16 h-16 bg-gray-300 rounded-xl shrink-0"> </div>
+
+            <div className = "min-w-0 flex-1">
+              <div className = "font-bold truncate text-[#1b2a4a] text-sm" title = {item.title}> {item.title} </div>
+              <div className = "text-sm text-gray-500 mt-1"> Added on {item.date}</div>
+              <div className = "text-sm text-[#1b2a4a] mt-2"> {item.status} </div>
+            </div>
+
+            <div className = "relative shrink-0">
+              <button
+                onClick = {() => setOpenDropdown(showActions ? null : item.id) }
+                className="px-3 py-2 bg-gray-300 rounded-full cursor-pointer">
+
+                <ChevronDownIcon className="w-4 h-4 ml-0.5" />
+              </button>
+
+              {actionsDropdown}
+            </div>
+
+          </div>
+        </div>
+
+        {modals}
+      </>
+    );
+  }
+
   return (
     <>
       <tr className = "table-row border-t border-gray-200">
@@ -103,49 +261,7 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
             <ChevronDownIcon className="w-4 h-4 ml-0.5" />
             </button>
 
-            {showActions && (
-              <div className = "absolute mt-1 w-max min-w-32 bg-white rounded-xl shadow-xl border border-gray-400 z-50">
-                
-                <button className = "actions-buttons"> 
-                  Edit
-                </button>
-
-                <button 
-                  className = "actions-buttons" 
-                  onClick = {() => {
-                    toggleFamilyShare(item.id);
-                    setOpenDropdown(null);
-                  }}
-                >
-                  {item.sharedWithFamily ? "Unshare from F&F" : "Share to F&F"}
-                </button>
-
-                {item.status === "Listed" ? (
-                  <button
-                    className = "actions-buttons"
-                    onClick={openConfirmCancel}
-                    disabled = {listing}
-                  > 
-                    {listing ? "Cancelling listing..." : "Cancel eBay Listing"}
-                  </button>
-                ) : (
-                  <button
-                    className = "actions-buttons"
-                    onClick={openEbayAgreement}
-                    disabled={listing}
-                  > 
-                    {listing ? "Creating listing..." : "Create eBay Listing"}
-                  </button>
-                )
-                  
-                }
-
-                <button className = "actions-buttons">
-                  Delete
-                </button>
-                
-              </div>
-            )}
+            {actionsDropdown}
 
           </div>
         </td>
@@ -174,87 +290,10 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
 
       </tr>
 
-      {showEbayAgreement && (
+      {(showEbayAgreement || showConfirmCancel) && (
         <tr>
           <td colSpan={3}>
-            <div className = "fixed inset-0 bg-black/50 flex items-center justify-center z-[100]"> 
-              <div className = "bg-white rounded-xl shadow-xl w-full max-w-lg p-6"> 
-                
-                <p className = "text-gray-500 mb-4"> 
-                  By continuing, you agree to comply to eBay's terms and conditions 
-                  and by clicking "Agree & Create Listing" you will create a 
-                  public eBay listing for your item and make it available for purchases. 
-                </p>
-
-                <div className = "flex justify-end gap-3">
-
-                  <button 
-                    className = "px-4 py-2 rounded-lg border border-gray-500 hover:opacity-90"
-                    onClick = {() => setShowEbayAgreement(false)}
-                    disabled={listing}
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    className = "px-4 py-2 rounded-lg bg-black text-white hover:opacity-90"
-                    onClick={agreedToEbayListing}
-                    disabled={listing}
-                  >
-                    {listing ? "Creating listing..." : "Agree & Create Listing"}
-                  </button>
-
-                </div>
-
-              </div>
-
-            </div> 
-          </td>
-        </tr>
-      )}
-
-      {showConfirmCancel && (
-        <tr>
-          <td colSpan = {3}>
-            <div className = "fixed inset-0 bg-black/50 flex items-center justify-center z-[100]"> 
-              <div className = "bg-white rounded-xl shadow-xl w-full max-w-lg p-6"> 
-                
-                <p className = "text-gray-500 mb-4"> 
-                  Are you sure you want to cancel this eBay listing? 
-                  By cancelling you agree to end the listing for your item
-                  and make it no longer available for purchase.
-                </p>
-
-                <div className = "flex justify-end gap-3"> 
-
-                  <button
-                    className = "px-4 py-2 rounded-lg border border-gray-500 hover:opacity-90"
-                    onClick={() => setShowConfirmCancel(false)}
-                    disabled={listing}
-                  >
-                    No
-                  </button>
-
-                  <button
-                    className = "px-4 py-2 rounded-lg bg-black text-white hover:opacity-90"
-                    onClick = {async () => {
-                      setShowConfirmCancel(false);
-                      const data = await cancelEbayListing(item.id);
-                      if (data) {
-                        console.log("eBay listing successfully cancelled!")
-                      }
-                    }}
-                    disabled = {listing}
-                  >
-                    {listing ? "Cancelling listing..." : "Yes, Cancel Listing"}
-                  </button>
-
-                </div>
-
-              </div>
-            
-            </div>
-
+            {modals}
           </td>
         </tr>
       )}
