@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClient";
 
 //this function would create a toekn in the backend and send it in the link to the user email to reset the password
@@ -45,4 +47,27 @@ export async function registerUser(fullName: string, email: string, password: st
 export async function logoutUser() {
   const { error } = await supabase.auth.signOut();
   if (error) throw new Error(error.message);
+}
+
+
+export function useAuth() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+ 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+ 
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+ 
+    return () => subscription.unsubscribe();
+  }, []);
+ 
+  return { session, loading };
 }

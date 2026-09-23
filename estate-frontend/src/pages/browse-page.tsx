@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import "./browse-page.css";
 
 interface ItemRow {
     id: string;
@@ -27,16 +26,6 @@ const CONDITIONS = ["New", "Like New", "Good", "Fair", "Poor"];
 
 const API_BASE = "http://localhost:8000";
 
-
-// const MOCK_ITEMS: ItemRow[] = [
-//     { id: "1", title: "Mid-century sofa", image_url: "", asking_price: 220, category: "Furniture", condition: "Good", brand: "Famous Chairs", created_at: "2026-07-01" },
-//     { id: "2", title: "Oak dining table", image_url: "", asking_price: 340, category: "Furniture", condition: "Like New", brand: "Ethan Allen", created_at: "2026-07-10" },
-//     { id: "3", title: "Wooden rocking chair", image_url: "", asking_price: 65, category: "Furniture", condition: "Fair", brand: "Famous Chairs", created_at: "2026-06-28" },
-//     { id: "4", title: "Record player", image_url: "", asking_price: 90, category: "Electronics", condition: "Good", brand: "Sony", created_at: "2026-07-15" },
-//     { id: "5", title: "Old CRT television", image_url: "", asking_price: 20, category: "Electronics", condition: "Poor", brand: "LG", created_at: "2026-06-20" },
-//     { id: "6", title: "Porcelain vase set", image_url: "", asking_price: 45, category: "Decor & Art", condition: "New", brand: "Target", created_at: "2026-07-18" },
-// ];
-
 export default function BrowsePage() {
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -58,7 +47,7 @@ export default function BrowsePage() {
     const [items, setItems] = useState<ItemRow[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [loadError, setLoadError] = useState(false);
-
+    const [showFilters, setShowFilters] = useState(false);
 
     function selectCategory(c: string) {
         setActiveCategoryState(c);
@@ -159,27 +148,43 @@ export default function BrowsePage() {
     }
 
     return (
-        <div className="browse-page">
-            <div className="browse-tabs">
+        <div className="min-h-screen bg-[#F2F4F7] text-[#1B2A4A] font-sans">
+            <div className="flex gap-2 overflow-x-auto border-b border-[#E5E9F0] bg-white px-6 lg:px-14 py-5 lg:py-6">
                 {CATEGORIES.map((c) => (
                     <button
                         key={c}
-                        className={`browse-tab ${c === activeCategory ? "is-active" : ""}`}
                         onClick={() => selectCategory(c)}
+                        className={`shrink-0 rounded-full border px-[18px] py-[9px] text-[13px] font-medium transition-colors duration-150 ${
+                            c === activeCategory
+                                ? "bg-[#1B2A4A] border-[#1B2A4A] text-white"
+                                : "bg-white border-[#CDD3DC] text-[#4A5568] hover:border-[#D4621A] hover:text-[#D4621A]"
+                        }`}
                     >
                         {c}
                     </button>
                 ))}
             </div>
 
-            <div className="browse-body">
-                <aside className="browse-filters">
-                    <h3>Filters</h3>
+            <div className="flex flex-col lg:flex-row items-start gap-8 max-w-[1200px] mx-auto px-6 lg:px-0 py-6 lg:py-8 pb-14 lg:pb-[72px] box-border">
+                <button
+                    onClick={() => setShowFilters((v) => !v)}
+                    className="lg:hidden w-full flex items-center justify-between rounded-xl border border-[#E5E9F0] bg-white px-5 py-3 text-sm font-medium text-[#1B2A4A]"
+                >
+                    Filters
+                    <span className="text-[#6B7A90] text-xs">{showFilters ? "Hide ▲" : "Show ▼"}</span>
+                </button>
 
-                    <div className="browse-filter-group">
-                        <span className="browse-filter-label">Condition</span>
+                <aside
+                    className={`${showFilters ? "block" : "hidden"} lg:block w-full lg:w-[clamp(180px,20%,260px)] lg:shrink-0 bg-white border border-[#E5E9F0] rounded-xl p-5 box-border lg:sticky lg:top-6`}
+                >
+                    <h3 className="text-[15px] font-semibold mb-[18px] text-[#1B2A4A]">Filters</h3>
+
+                    <div className="flex flex-col gap-2 mb-[22px]">
+                        <span className="text-xs font-semibold tracking-wide uppercase text-[#6B7A90] mb-1">
+                            Condition
+                        </span>
                         {CONDITIONS.map((c) => (
-                            <label key={c} className="browse-checkbox">
+                            <label key={c} className="flex items-center gap-2 text-[13px] text-[#4A5568] cursor-pointer">
                                 <input
                                     type="checkbox"
                                     checked={selectedConditions.has(c)}
@@ -190,72 +195,93 @@ export default function BrowsePage() {
                         ))}
                     </div>
 
-                    <div className="browse-filter-group">
-                        <span className="browse-filter-label">Price range</span>
-                        <div className="browse-price-inputs">
+                    <div className="flex flex-col gap-2 mb-[22px]">
+                        <span className="text-xs font-semibold tracking-wide uppercase text-[#6B7A90] mb-1">
+                            Price range
+                        </span>
+                        <div className="flex items-center gap-2">
                             <input
                                 type="number"
                                 placeholder="Min"
                                 value={minPrice}
                                 onChange={(e) => setMinPrice(e.target.value)}
+                                className="w-0 flex-1 rounded-md border border-[#CDD3DC] px-2.5 py-2 text-[13px] outline-none focus:border-[#D4621A]"
                             />
-                            <span>–</span>
+                            <span className="text-xs text-[#A0AABA]">–</span>
                             <input
                                 type="number"
                                 placeholder="Max"
                                 value={maxPrice}
                                 onChange={(e) => setMaxPrice(e.target.value)}
+                                className="w-0 flex-1 rounded-md border border-[#CDD3DC] px-2.5 py-2 text-[13px] outline-none focus:border-[#D4621A]"
                             />
                         </div>
                     </div>
 
-                    <div className="browse-filter-group">
-                        <span className="browse-filter-label">Brand</span>
+                    <div className="flex flex-col gap-2 mb-[22px]">
+                        <span className="text-xs font-semibold tracking-wide uppercase text-[#6B7A90] mb-1">
+                            Brand
+                        </span>
                         <input
                             type="text"
                             value={brand}
                             onChange={(e) => setBrand(e.target.value)}
+                            className="rounded-md border border-[#CDD3DC] px-2.5 py-2 text-[13px] outline-none focus:border-[#D4621A]"
                         />
                     </div>
                 </aside>
 
-                <div className="browse-results">
-                    <div className="browse-results-head">
+                <div className="flex-1 w-full">
+                    <div className="flex items-center justify-between mb-[18px] text-[13px] text-[#6B7A90]">
                         <span>{sortedItems.length} items</span>
-                        <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                        <select
+                            value={sort}
+                            onChange={(e) => setSort(e.target.value)}
+                            className="rounded-md border border-[#CDD3DC] px-3 py-2 text-[13px] text-[#1B2A4A] bg-white outline-none"
+                        >
                             <option value="newest">Newest</option>
                             <option value="price_low">Price: Low to High</option>
                             <option value="price_high">Price: High to Low</option>
                         </select>
                     </div>
 
-                    {isLoading && <p className="browse-empty">Loading…</p>}
+                    {isLoading && <p className="col-span-full text-center text-[#6B7A90] text-sm py-12">Loading…</p>}
 
                     {!isLoading && loadError && (
-                        <p className="browse-empty">Couldn't load items. Is the backend running?</p>
+                        <p className="col-span-full text-center text-[#6B7A90] text-sm py-12">
+                            Couldn't load items.
+                        </p>
                     )}
 
                     {!isLoading && !loadError && (
-                        <div className="browse-grid">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[18px]">
                             {sortedItems.map((item) => (
-                                <a href={`/items/${item.id}`} key={item.id} className="browse-card">
+                                <a
+                                    href={`/items/${item.id}`}
+                                    key={item.id}
+                                    className="flex flex-col bg-white border border-[#E5E9F0] rounded-xl overflow-hidden no-underline transition-all duration-200 hover:-translate-y-[3px] hover:border-[#D4621A] hover:shadow-[0_8px_20px_rgba(27,42,74,0.1)]"
+                                >
                                     <div
-                                        className="browse-card-image"
+                                        className="w-full aspect-video bg-[#E5E9F0] bg-cover bg-center"
                                         style={{ backgroundImage: `url(${item.image_url})` }}
                                     />
-                                    <div className="browse-card-info">
-                                        <span className="browse-card-title">{item.title}</span>
+                                    <div className="flex flex-col gap-1 px-4 py-3.5">
+                                        <span className="text-sm font-semibold text-[#1B2A4A]">{item.title}</span>
                                         {item.condition && (
-                                            <span className="browse-card-condition">{item.condition}</span>
+                                            <span className="text-[11px] font-medium uppercase tracking-wide text-[#6B7A90]">
+                                                {item.condition}
+                                            </span>
                                         )}
-                                        <span className="browse-card-price">
+                                        <span className="text-sm font-semibold text-[#D4621A] mt-0.5">
                                             {item.asking_price != null ? `$${item.asking_price}` : "Price TBD"}
                                         </span>
                                     </div>
                                 </a>
                             ))}
                             {sortedItems.length === 0 && (
-                                <p className="browse-empty">No items match your filters.</p>
+                                <p className="col-span-full text-center text-[#6B7A90] text-sm py-12">
+                                    No items match your filters.
+                                </p>
                             )}
                         </div>
                     )}

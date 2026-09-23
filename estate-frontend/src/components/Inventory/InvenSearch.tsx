@@ -24,7 +24,7 @@ export default function InvenSearch({search, setSearch, setStatus}: Props) {
 
         <select
           onChange={(e) => setStatus(e.target.value)}
-          className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-[16px] outline-none"
+          className="w-24 sm:w-32 shrink-0 px-2 sm:px-3 py-2 border border-gray-300 rounded-lg text-sm sm:text-[16px] outline-none"
         >
 
           <option value= "all"> All Items </option>

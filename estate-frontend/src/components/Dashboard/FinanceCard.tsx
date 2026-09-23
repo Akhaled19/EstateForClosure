@@ -9,7 +9,7 @@ export default function FinanceCard() {
 
       <div className="flex justify-between py-3 border-b border-gray-200">
 
-        <div className = "card-values">
+        <div className="text-[#D4621A] font-bold">
           Revenue
         </div>
 
@@ -21,7 +21,7 @@ export default function FinanceCard() {
 
       <div className="flex justify-between py-3 border-b border-gray-200">
 
-        <div className = "card-values">
+        <div className="text-[#D4621A] font-bold">
           Estate Value
         </div>
 
@@ -33,7 +33,7 @@ export default function FinanceCard() {
 
       <div className="flex justify-between py-3 border-b border-gray-200">
 
-        <div className = "card-values">
+        <div className="text-[#D4621A] font-bold">
           Today's Sales
         </div>
 
@@ -45,7 +45,7 @@ export default function FinanceCard() {
 
       <div className="flex justify-between py-3">
 
-        <div className = "card-values">
+        <div className="text-[#D4621A] font-bold">
           Average Sale Price
         </div>
 
