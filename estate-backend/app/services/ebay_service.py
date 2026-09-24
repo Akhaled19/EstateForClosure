@@ -124,6 +124,7 @@ async def create_inventory_item(
         description: str,
         aspects: dict,
         condition: str | None,
+        image_url: str,
     ):
 
     access_token = await refresh_ebay_access_token()
@@ -141,11 +142,11 @@ async def create_inventory_item(
             "title": title,
             "description": description,
             "imageUrls": [
-                "https://fvkypuuhumnjzaevsxxk.supabase.co/storage/v1/object/sign/test/chair-image.jpg?token=eyJraWQiOiJkMjM2MGMyMy1iMmRmLTRjMzUtYmViZi1hMjVlNGI1ODYwYTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ0ZXN0L2NoYWlyLWltYWdlLmpwZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3ODc5MzExOTMsImV4cCI6MTgxOTQ2NzE5M30.QiyzktIOthWbAt7RYND8eZZR0FsBgzYS8fIVDbIofS4"
+                image_url
             ],
             "aspects": aspects
         },
-        "condition": "USED_EXCELLENT",
+        "condition": condition,
         "availability": {
             "shipToLocationAvailability": {
                 "quantity": 1,
@@ -548,3 +549,59 @@ async def get_item_ebay_requirements(
         "known_aspects": aspects,
         "missing_aspects": missing_aspects,
     }
+
+async def get_item_condition_policies(category_id: str):
+    access_token = await get_ebay_application_token()
+
+    url = f"{EBAY_API_URL}/sell/metadata/v1/marketplace/EBAY_US/get_item_condition_policies"
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.get(url, headers=headers)
+
+    if response.status_code != 200:
+        return response.status_code, response.text
+
+    data = response.json()
+
+    for policy in data.get("itemConditionPolicies", []):
+        if policy.get("categoryId") == category_id:
+            return 200, policy
+
+    return 404, "No condition policy found for this category"
+
+
+# helper function to see if our current item condition directly matches any condition that ebay allows for that item
+def get_matching_ebay_condition(item_condition: str, ebay_conditions: list):
+    for condition in ebay_conditions:
+        if condition["conditionDescription"] == item_condition:
+            return condition
+    return None
+
+
+# helper function to get the eBay condition enum value based on the condition ID
+def get_ebay_condition_enum(condition_id: str):
+    condition_map = {
+        "1000": "NEW",
+        "1500": "NEW_OTHER",
+        "1750": "NEW_WITH_DEFECTS",
+        "2000": "CERTIFIED_REFURBISHED",
+        "2010": "EXCELLENT_REFURBISHED",
+        "2020": "VERY_GOOD_REFURBISHED",
+        "2030": "GOOD_REFURBISHED",
+        "2500": "SELLER_REFURBISHED",
+        "2750": "LIKE_NEW",
+        "2990": "PRE_OWNED_EXCELLENT",
+        "3000": "USED_EXCELLENT",
+        "3010": "PRE_OWNED_FAIR",
+        "4000": "USED_VERY_GOOD",
+        "5000": "USED_GOOD",
+        "6000": "USED_ACCEPTABLE",
+        "7000": "FOR_PARTS_OR_NOT_WORKING",
+    }
+
+    return condition_map.get(condition_id)

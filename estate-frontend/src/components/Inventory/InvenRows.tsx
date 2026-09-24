@@ -18,8 +18,7 @@ type Property = {
   onEbayToast: (message: string, type: EbayToastType) => void;
 };
 
-export default function InvenRows({item, variant, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus, onEbayListingSuccess}: Property) {
-export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus, onEbayToast}: Property) {
+export default function InvenRows({item, variant, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus, onEbayToast}: Property) {
   
   const showActions = (openDropdown === item.id);
   const [listing, setListing] = useState(false);
@@ -29,6 +28,9 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
   const [missingAspects, setMissingAspects] = useState<any[]>([]);
   const [ebayAspectValues, setEbayAspectValues] = useState<Record<string, string[]>>({});
   const [ebayAspectErrors, setEbayAspectErrors] = useState("");
+
+  const [selectedEbayCondition, setSelectedEbayCondition] = useState(""); // the condition selected by the user
+  const [availableEbayConditions, setAvailableEbayConditions] = useState<any[]>([]); // supported conditions ebay allows
 
   async function createEbayListing(itemId: string) {
     try {
@@ -40,7 +42,7 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ aspects: ebayAspectValues }),
+        body: JSON.stringify({ aspects: ebayAspectValues, ebay_condition: selectedEbayCondition || null }),
       });
 
       const data = await response.json();
@@ -96,7 +98,9 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
       }
 
       setMissingAspects(data.missing_aspects);
-      if (data.missing_aspects.length > 0) {
+      setAvailableEbayConditions(data.available_conditions);
+
+      if (data.missing_aspects.length > 0 || !data.condition_match) {
         setShowEbayAspects(true);
       } else {
         setShowEbayAgreement(true);
@@ -384,6 +388,33 @@ export default function InvenRows({item, openDropdown, setOpenDropdown, toggleFa
                   missingAspects = {missingAspects}
                   onAspectsChange = {setEbayAspectValues}
                 />
+
+                {availableEbayConditions.length > 0 && (
+                  <div className = "mt-4"> 
+                    <label className = "block text-sm font-medium mb-2">
+                      <span className = "text-red-600">*</span>
+                      Condition
+                    </label>
+
+                    <select
+                      value = {selectedEbayCondition}
+                      onChange={(e) => setSelectedEbayCondition(e.target.value)}
+                      className = "text-sm w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-gray-400"
+                    >
+                    
+                    <option value = ""> Select Condition </option>
+
+                    {availableEbayConditions.map((condition) => (
+                      <option key={condition.conditionId} value={condition.conditionDescription}>
+                        {condition.conditionDescription}
+                      </option>
+                    ))}
+
+                    </select>
+                  
+                  </div>
+                )}
+
                 {ebayAspectErrors && (
                   <p className = "text-sm review-warning flex items-start gap-2 !mt-4"> 
                   <ExclamationCircleIcon className = "w-6 h-6 shrink-0"/>

@@ -27,6 +27,9 @@ from app.services.ebay_service import (
     delete_offer,
     parse_dimensions,
     get_missing_required_aspects,
+    get_item_condition_policies,
+    get_matching_ebay_condition,
+    get_ebay_condition_enum,
 )
 
 logger = logging.getLogger(__name__)
@@ -74,6 +77,7 @@ async def list_item(
 
     if not item.title: 
         raise HTTPException(400, "Item needs a title")
+    
     if item.asking_price is None:
         raise HTTPException(400, "Item needs a asking price")
 
@@ -86,6 +90,34 @@ async def list_item(
     category_id = category_result["category_id"]
     category_name = category_result["category_name"]
     required_aspects = category_result["required_aspects"]
+
+    status_code, condition_policy = await get_item_condition_policies(category_id)
+
+    if status_code != 200:
+        raise HTTPException(502, f"Failed to get eBay item conditions: {condition_policy}")
+
+    ebay_conditions = condition_policy["itemConditions"]
+
+    # check if our item condition matches any of ebay's allowed conditions
+    if item.condition:
+        matching_condition = get_matching_ebay_condition(item_condition = item.condition.value, ebay_conditions = ebay_conditions)
+    else:
+        matching_condition = None
+
+    if matching_condition is None:
+        if not listing_aspects or not listing_aspects.ebay_condition:
+            raise HTTPException(status_code = 400, detail = {
+                "message": "Please select a eBay condition",
+                "available_conditions": ebay_conditions
+            },)
+
+        matching_condition = get_matching_ebay_condition(item_condition = listing_aspects.ebay_condition, ebay_conditions = ebay_conditions)
+
+    if matching_condition is None:
+        raise HTTPException(status_code = 400, detail = { 
+            "message": "Current item condition is not supported for this eBay category",
+            "available_conditions": ebay_conditions
+        },)
 
     dimensions = parse_dimensions(item.dimensions)
     aspects = {}
@@ -114,12 +146,20 @@ async def list_item(
         },)
 
 
+    ebay_condition = get_ebay_condition_enum(matching_condition["conditionId"])
+
+    if ebay_condition is None:
+        raise HTTPException(status_code=400, detail={
+            "message": "Selected eBay condition is not supported",
+        },)
+
     status_code, response = await create_inventory_item(
         item_id = item.id,
         title = item.title,
         description = item.description or "",
         aspects = aspects,
-        condition = item.condition.value if item.condition else None,
+        condition = ebay_condition,
+        image_url = item.image_url,
     )
 
     if status_code not in (200, 204):
@@ -320,4 +360,29 @@ async def get_listing_requirements(
     if status_code != 200:
         raise HTTPException(status_code=502, detail=f"Failed to determine eBay requirements: {requirements}")
 
-    return requirements
+    category_id = requirements["category_id"]
+    status_code, condition_policy = await get_item_condition_policies(category_id)
+
+    if status_code != 200:
+        raise HTTPException(status_code=502, detail=f"Failed to get eBay condition requirements: {condition_policy}")
+
+    ebay_conditions = condition_policy["itemConditions"]
+
+
+    if item.condition:
+        matching_condition = get_matching_ebay_condition(item_condition = item.condition.value, ebay_conditions = ebay_conditions)
+    else:
+        matching_condition = None
+
+
+
+    return {
+        **requirements, 
+
+        "condition_match": matching_condition is not None,
+
+        "available_conditions": ebay_conditions if matching_condition is None else [],
+    }
+
+
+

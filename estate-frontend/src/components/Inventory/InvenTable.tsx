@@ -191,7 +191,7 @@ export default function InvenTable({ onEbayToast }: Prop) {
               setOpenDropdown={setOpenDropdown}
               toggleFamilyShare={toggleFamilyShare}
               updateItemStatus={updateItemStatus}
-              onEbayListingSuccess={onEbayListingSuccess}
+              onEbayToast={onEbayToast}
               />
           ))
         )}
