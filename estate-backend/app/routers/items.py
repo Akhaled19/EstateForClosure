@@ -15,6 +15,7 @@ from app.services.storage_service import upload_item_image
 from app.services import item_scan_draft_service as draft_service
 from app.services.get_owner_shared_items import get_owner_shared_items
 from app.worker.actors import run_ai_scan
+from app.helpers.item_response import build_item_detail_response
  
 
 logger = logging.getLogger(__name__)
@@ -80,23 +81,7 @@ async def list_items(
     result = await db.execute(query)
     items = result.scalars().all()
 
-    return [
-        ItemDetailResponse(
-            id=item.id,
-            is_finalized=item.title is not None,
-            status=item.status.value,
-            image_url=item.image_url,
-            title=item.title,
-            description=item.description,
-            category=item.category,
-            condition=item.condition.value if item.condition else None,
-            brand=item.brand,
-            dimensions=item.dimensions,
-            asking_price=item.asking_price,
-            shared_with_family=item.shared_with_family,
-        )
-        for item in items
-    ]
+    return [ build_item_detail_response(item) for item in items ]
 
 #fetch the items that are shared with family 
 @router.get("/family-view", response_model=list[OwnerSharedItemResponse])
@@ -168,21 +153,8 @@ async def get_item(
                 "ai_confidence": draft.get("confidence"),
                 "ai_error": draft.get("error"),
             })
-    
-    return ItemDetailResponse(
-        id = item.id,
-        is_finalized = is_finalized,
-        status = item.status.value,
-        image_url = item.image_url,
-        title = item.title,
-        description=item.description,
-        category=item.category,
-        condition=item.condition.value if item.condition else None,
-        brand=item.brand,
-        dimensions=item.dimensions,
-        asking_price=item.asking_price,
-        **ai_fields,
-    )
+
+    return build_item_detail_response(item, **ai_fields)
 
 #update the item's entry 
 @router.patch("/{item_id}/finalize", response_model=ItemDetailResponse)
@@ -218,19 +190,28 @@ async def finalize_item(
     await db.commit()
     await db.refresh(item)
 
-    return ItemDetailResponse(
-        id=item.id,
-        is_finalized=True,
-        status=item.status.value,
-        image_url=item.image_url,
-        title=item.title,
-        description=item.description,
-        category=item.category,
-        condition=item.condition.value,
-        brand=item.brand,
-        dimensions=item.dimensions,
-        asking_price=item.asking_price,
-    )
+    return build_item_detail_response(item)
+
+#delete an item 
+@router .delete("/{item_id}")
+async def delete_item(
+    item_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    result = await db.execute(select(Item).where(Item.id == item_id))
+    item = result.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(404, "Item not found")
+    
+    if str(item.user_id) != str(current_user.id):
+        raise HTTPException(403, "Not your item")
+    
+    if item.ebay_listing_id:
+        raise HTTPException(409, "Please cancel the ebay listing before deleting this item.")
+    
+    await db.delete(item)
+    await db.commit()
 
 #explicity set the item's share status
 @router.patch("/{item_id}/share", response_model=ItemDetailResponse)
@@ -253,20 +234,7 @@ async def set_item_share(
     await db.commit()
     await db.refresh(item)
 
-    return ItemDetailResponse(
-        id = item.id,
-        is_finalized = item.title is not None,
-        status = item.status.value, 
-        image_url = item.image_url,
-        title = item.title,
-        description = item.description, 
-        category = item.category,
-        condition = item.condition.value if item.condition else None,
-        brand = item.brand,
-        dimensions = item.dimensions,
-        asking_price = item.asking_price,
-        shared_with_family = item.shared_with_family, 
-    )
+    return build_item_detail_response(item)
 
 
 #fetch the interest items 

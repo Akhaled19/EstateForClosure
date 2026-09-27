@@ -29,6 +29,7 @@ class ItemDetailResponse(BaseModel):
     id: str
     is_finalized: bool
     status: str
+    created_at: Optional[str] = None
     image_url: str
     shared_with_family: bool = False
 
