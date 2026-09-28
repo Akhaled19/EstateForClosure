@@ -29,8 +29,8 @@ function Layout() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />}/>
-          <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>}/>
-          {/* <Route path="/listings" element= {<Inventory />}/> */}
+          <Route path="/inventory" element={<ProtectedRoute> <Inventory /> </ProtectedRoute>}/>
+          {/* <Route path="/inventory" element= {<Inventory />}/> */}
 
           <Route path="/listings" element={<ProtectedRoute><Listings /></ProtectedRoute>}/>
           {/* <Route path="/listings" element= {<Listings />}/> */}
