@@ -2,8 +2,8 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import type { Item, Status } from "./InvenTable"
 import EbayAspects from "../EbayAspects";
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
 
 type EbayToastType = "success" | "error";
@@ -16,9 +16,10 @@ type Property = {
   toggleFamilyShare: (id: string) => void;
   updateItemStatus: (id: string, status: Status) => void;
   onEbayToast: (message: string, type: EbayToastType) => void;
+  onEbayConnect: () => void;
 };
 
-export default function InvenRows({item, variant, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus, onEbayToast}: Property) {
+export default function InvenRows({item, variant, openDropdown, setOpenDropdown, toggleFamilyShare, updateItemStatus, onEbayToast, onEbayConnect}: Property) {
   
   const showActions = (openDropdown === item.id);
   const [listing, setListing] = useState(false);
@@ -32,8 +33,20 @@ export default function InvenRows({item, variant, openDropdown, setOpenDropdown,
   const [selectedEbayCondition, setSelectedEbayCondition] = useState(""); // the condition selected by the user
   const [availableEbayConditions, setAvailableEbayConditions] = useState<any[]>([]); // supported conditions ebay allows
 
+  
   async function createEbayListing(itemId: string) {
     try {
+      
+      const statusResponse = await fetch("http://localhost:8000/ebay/status");
+      const statusData = await statusResponse.json();
+
+      if (!statusData.connected) {
+        console.log("eBay account is not connected");
+        onEbayConnect();
+        return null;
+      }
+
+
       setListing(true);
 
       const response = await fetch(`http://localhost:8000/ebay/list/${itemId}`, 
@@ -90,6 +103,17 @@ export default function InvenRows({item, variant, openDropdown, setOpenDropdown,
     setOpenDropdown(null);
 
     try {
+
+      
+      const statusResponse = await fetch("http://localhost:8000/ebay/status");
+      const statusData = await statusResponse.json();
+
+      if (!statusData.connected) {
+        console.log("eBay account is not connected");
+        onEbayConnect();
+        return;
+      }
+
       const response = await fetch(`http://localhost:8000/ebay/list/${item.id}/requirements`);
       const data = await response.json();
 
@@ -508,8 +532,6 @@ export default function InvenRows({item, variant, openDropdown, setOpenDropdown,
         </tr>
       )}
 
-
-    
 
 
     </>

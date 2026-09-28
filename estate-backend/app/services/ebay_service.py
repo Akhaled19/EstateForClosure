@@ -12,13 +12,14 @@ EBAY_AUTH_URL = "https://auth.sandbox.ebay.com/oauth2/authorize"
 EBAY_SCOPE = "https://api.ebay.com/oauth/api_scope/sell.inventory"
 EBAY_API_URL = "https://api.sandbox.ebay.com"
 
-def ebay_auth_url() -> str:
+def ebay_auth_url(state: str) -> str:
     return (
         f"{EBAY_AUTH_URL}"
         f"?client_id={settings.EBAY_APP_ID}"
         f"&response_type=code"
         f"&redirect_uri={settings.EBAY_RU_NAME}"
         f"&scope={EBAY_SCOPE}"
+        f"&state={state}"
     )
 
 
@@ -57,7 +58,7 @@ async def exchange_ebay_code(code: str):
     return response.json()
 
 
-async def refresh_ebay_access_token():
+async def refresh_ebay_access_token(refresh_token: str):
     url = "https://api.sandbox.ebay.com/identity/v1/oauth2/token"
 
     credentials = f"{settings.EBAY_APP_ID}:{settings.EBAY_CERT_ID}"
@@ -72,7 +73,7 @@ async def refresh_ebay_access_token():
 
     data = {
         "grant_type": "refresh_token",
-        "refresh_token": settings.EBAY_REFRESH_TOKEN,
+        "refresh_token": refresh_token,
         "scope": EBAY_SCOPE,
     }
 
@@ -125,9 +126,10 @@ async def create_inventory_item(
         aspects: dict,
         condition: str | None,
         image_url: str,
+        access_token: str,
     ):
 
-    access_token = await refresh_ebay_access_token()
+    # access_token = await refresh_ebay_access_token()
 
     url = f"{EBAY_API_URL}/sell/inventory/v1/inventory_item/{item_id}"
 
@@ -167,9 +169,9 @@ async def create_inventory_item(
     return response.status_code, response.text
 
 
-async def create_inventory_location():
+async def create_inventory_location(access_token: str):
     location_key = "test-location"
-    access_token = await refresh_ebay_access_token()
+    # access_token = await refresh_ebay_access_token()
 
     url = f"{EBAY_API_URL}/sell/inventory/v1/location/{location_key}"
 
@@ -200,8 +202,8 @@ async def create_inventory_location():
     return response.status_code, response.text
 
 
-async def create_offer(item_id: str, price: float, category_id: str = "54235" ):
-    access_token = await refresh_ebay_access_token()
+async def create_offer(item_id: str, price: float, category_id: str = "54235" , access_token: str = ""):
+    # access_token = await refresh_ebay_access_token()
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer"
     
     headers = {
@@ -237,8 +239,8 @@ async def create_offer(item_id: str, price: float, category_id: str = "54235" ):
     return response.status_code, response.text
 
 
-async def get_existing_offer(item_id: str):
-    access_token = await refresh_ebay_access_token()
+async def get_existing_offer(item_id: str, access_token: str):
+    # access_token = await refresh_ebay_access_token()
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer"
 
     headers = {
@@ -255,8 +257,8 @@ async def get_existing_offer(item_id: str):
     return response.status_code, response.text
 
 
-async def publish_offer(offer_id: str):
-    access_token = await refresh_ebay_access_token()
+async def publish_offer(offer_id: str, access_token: str):
+    # access_token = await refresh_ebay_access_token()
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer/{offer_id}/publish"
 
     headers = {
@@ -273,8 +275,8 @@ async def publish_offer(offer_id: str):
     return response.status_code, response.text
 
 
-async def get_offer(offer_id: str):
-    access_token = await refresh_ebay_access_token()
+async def get_offer(offer_id: str, access_token: str):
+    # access_token = await refresh_ebay_access_token()
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer/{offer_id}"
 
     headers = {
@@ -288,8 +290,8 @@ async def get_offer(offer_id: str):
 
     return response.status_code, response.text
 
-async def update_offer():
-    access_token = await refresh_ebay_access_token()
+async def update_offer(access_token: str):
+    # access_token = await refresh_ebay_access_token()
     offer_id = "11488317010"
 
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer/{offer_id}"
@@ -327,8 +329,8 @@ async def update_offer():
 
     return response.status_code, response.text
 
-async def delete_offer(offer_id: str):
-    access_token = await refresh_ebay_access_token()
+async def delete_offer(offer_id: str, access_token: str):
+    # access_token = await refresh_ebay_access_token()
 
     url = f"{EBAY_API_URL}/sell/inventory/v1/offer/{offer_id}"
 

@@ -1,5 +1,8 @@
 import logging
 import json
+import uuid
+
+from app.db.redis import get_redis
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -8,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.postgres import get_db
 from app.core.deps import get_current_user
 from app.models.item import Item, ItemStatus
+from app.models.ebay_connect import EbayConnect
 
 from app.schemas.ebay import EbayListingAspects
 
@@ -30,6 +34,7 @@ from app.services.ebay_service import (
     get_item_condition_policies,
     get_matching_ebay_condition,
     get_ebay_condition_enum,
+    refresh_ebay_access_token,
 )
 
 logger = logging.getLogger(__name__)
@@ -37,22 +42,53 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ebay", tags=["ebay"])
 
 
+async def get_user_ebay_connect(db: AsyncSession, user_id: str):
+    result = await db.execute(select(EbayConnect).where(EbayConnect.user_id == uuid.UUID(user_id)))
+    return result.scalar_one_or_none()
+
+
+# http://localhost:8000/ebay/auth
 # send user to eBay to authorize
 @router.get("/auth")
-async def ebay_auth():
+async def ebay_auth(current_user = Depends(get_current_user)):
 
-    authorization_url = ebay_auth_url()
+    state = str(uuid.uuid4())
+    redis = await get_redis()
+    await redis.set(f"ebay_oauth_state:{state}", current_user.id, ex=600)
+
+    authorization_url = ebay_auth_url(state)
 
     return RedirectResponse(url=authorization_url)
 
 
 @router.get("/auth/callback")
-async def ebay_auth_callback(code: str):
+async def ebay_auth_callback(code: str, state: str, db: AsyncSession = Depends(get_db)):
+
+    redis = await get_redis()
+    user_id = await redis.get(f"ebay_oauth_state:{state}")
+    if user_id is None:
+        raise HTTPException(status_code=400, detail="Invalid or expired eBay OAuth state")
+
+    await redis.delete(f"ebay_oauth_state:{state}")
 
     token_data = await exchange_ebay_code(code)
 
+    refresh_token = token_data.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=502, detail="Failed to obtain eBay refresh token")
 
-    return token_data
+    result = await db.execute(select(EbayConnect).where(EbayConnect.user_id == uuid.UUID(user_id)))
+    ebay_connect = result.scalar_one_or_none()
+
+    if ebay_connect:
+        ebay_connect.refresh_token = refresh_token
+    else:
+        ebay_connect = EbayConnect(user_id=uuid.UUID(user_id), refresh_token=refresh_token)
+        db.add(ebay_connect)
+
+    await db.commit()
+
+    return RedirectResponse(url="https://localhost:5173/inventory")
 
 # creates eBay listing of a item from our db
 @router.post("/list/{item_id}")
@@ -153,6 +189,17 @@ async def list_item(
             "message": "Selected eBay condition is not supported",
         },)
 
+
+    ebay_connect = await get_user_ebay_connect(db, current_user.id)
+
+    if not ebay_connect:
+        raise HTTPException(status_code=400, detail={
+            "message": "No eBay account connected"
+        },)
+
+    refresh_token = ebay_connect.refresh_token
+    access_token = await refresh_ebay_access_token(refresh_token)
+
     status_code, response = await create_inventory_item(
         item_id = item.id,
         title = item.title,
@@ -160,6 +207,7 @@ async def list_item(
         aspects = aspects,
         condition = ebay_condition,
         image_url = item.image_url,
+        access_token = access_token
     )
 
     if status_code not in (200, 204):
@@ -168,7 +216,7 @@ async def list_item(
 
 
     # check if there is already an existing offer
-    status_code, response = await get_existing_offer(item.id)
+    status_code, response = await get_existing_offer(item.id, access_token=access_token)
     offer_id = None
 
     if status_code == 200:
@@ -183,7 +231,7 @@ async def list_item(
 
     # if no offer, create one
     if offer_id is None:
-        status_code, response = await create_offer(item_id=item.id, price=item.asking_price, category_id=category_id)
+        status_code, response = await create_offer(item_id=item.id, price=item.asking_price, category_id=category_id, access_token = access_token)
 
         if status_code not in (200, 201):
             raise HTTPException(502, f"eBay offer creation failed: {response}")
@@ -196,7 +244,7 @@ async def list_item(
             raise HTTPException(502, f"Failed to retrieve offer ID from eBay: {response}")
 
 
-    status_code, response = await publish_offer(offer_id)
+    status_code, response = await publish_offer(offer_id, access_token=access_token)
 
     if status_code not in (200, 201):
         raise HTTPException(502, f"Failed to publish eBay offer")
@@ -237,7 +285,17 @@ async def cancel_listing(
     if not item.ebay_listing_id:
         raise HTTPException(400, "Item doesn't have an eBay listing")
 
-    status_code, response = await get_existing_offer(item.id)
+    ebay_connect = await get_user_ebay_connect(db, current_user.id)
+
+    if not ebay_connect:
+        raise HTTPException(status_code=400, detail={
+            "message": "No eBay account connected"
+        },)
+
+    refresh_token = ebay_connect.refresh_token
+    access_token = await refresh_ebay_access_token(refresh_token)
+
+    status_code, response = await get_existing_offer(item.id, access_token = access_token)
 
     if status_code != 200:
         raise HTTPException(502, f"Failed to find existing eBay offer: {response}")
@@ -252,7 +310,7 @@ async def cancel_listing(
     except (json.JSONDecodeError, KeyError, IndexError):
         raise HTTPException(502, f"Failed to read existing eBay offer: {response}")
 
-    status_code, response = await delete_offer(offer_id)
+    status_code, response = await delete_offer(offer_id, access_token=access_token)
 
     if status_code not in (200, 204):
         raise HTTPException(502, f"Failed to cancel eBay Listing: {response}")
@@ -386,3 +444,12 @@ async def get_listing_requirements(
 
 
 
+@router.get("/status")
+async def get_ebay_status(current_user = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    ebay_connect = await get_user_ebay_connect(db, current_user.id)
+
+    
+    return {
+        "connected": ebay_connect is not None  # "connected": False to test what it looks like if the user is not connected to eBay. 
+
+    }
