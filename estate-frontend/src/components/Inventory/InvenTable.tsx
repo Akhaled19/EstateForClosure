@@ -2,6 +2,7 @@ import { useState } from "react";
 import InvenRows from "./InvenRows";
 import InvenSearch from "./InvenSearch";
 import { setItemShare } from "../../services/items";
+import EbayConnectPopup from "../EbayConnectPopup";
 
 
 export type Status = "Unlisted" | "Listed" | "Sold" | "Shipped";
@@ -73,6 +74,8 @@ export default function InvenTable({ onEbayToast }: Prop) {
   const [status, setStatus] = useState("all");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [invenItems, setInvenItems] = useState(items);
+  const [showEbayConnectPopup, setShowEbayConnectPopup] = useState(false);
+
 
 
   const filtered = invenItems.filter((item) => {
@@ -166,6 +169,7 @@ export default function InvenTable({ onEbayToast }: Prop) {
                   toggleFamilyShare = {toggleFamilyShare} 
                   updateItemStatus={updateItemStatus} 
                   onEbayToast={onEbayToast}
+                  onEbayConnect={() => setShowEbayConnectPopup(true)}
                 />
               ))
             )}
@@ -173,6 +177,14 @@ export default function InvenTable({ onEbayToast }: Prop) {
           </tbody>
         
         </table>
+
+        {showEbayConnectPopup && (
+          <EbayConnectPopup onClose={() => setShowEbayConnectPopup(false)} />
+        )}
+        
+        
+
+
       </div>
 
       {/* Mobile card list */}
@@ -192,6 +204,7 @@ export default function InvenTable({ onEbayToast }: Prop) {
               toggleFamilyShare={toggleFamilyShare}
               updateItemStatus={updateItemStatus}
               onEbayToast={onEbayToast}
+              onEbayConnect={() => setShowEbayConnectPopup(true)}
               />
           ))
         )}

@@ -8,6 +8,7 @@ from alembic import context
 from app.models.item import Item 
 from app.models.profile import Profile 
 from app.models.item_interest import ItemInterest
+from app.models.ebay_connect import EbayConnect
 from app.db.postgres import Base
 
 from app.core.config import settings
