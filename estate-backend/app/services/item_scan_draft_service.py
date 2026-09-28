@@ -53,3 +53,4 @@ async def mark_failure(mongo: AsyncIOMotorDatabase, item_id: str, error: str) ->
 
 async def get_draft(mongo: AsyncIOMotorDatabase, item_id: str) -> Optional[dict]:
     return await mongo[COLLECTION].find_one({"item_id": item_id})
+
